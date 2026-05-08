@@ -3,7 +3,7 @@ from .models import Invoice, Client
 
 from django import forms
 from django.forms import inlineformset_factory
-from .models import Invoice, Item
+from .models import Invoice, Item, Client
 
 class GuestInvoiceForm(forms.ModelForm):
     class Meta:
@@ -32,3 +32,16 @@ class ClientInvoiceForm(forms.ModelForm):
     class Meta:
         model = Invoice
         fields = ['client', 'due_date']
+
+
+
+class CreateClientForm(forms.ModelForm):
+    class Meta:
+        model = Client
+        fields = ['name', 'email', 'place', 'phone']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Customer Name'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}),
+            'place': forms.TextInput(attrs={'class': 'form-control', 'placeholder': ' Customer Address'}),
+            'phone': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Phone'}),
+        }

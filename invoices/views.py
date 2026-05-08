@@ -12,7 +12,7 @@ from weasyprint import HTML
 from datetime import date,datetime
 from django.shortcuts import render, redirect
 from .models import Invoice, Item
-from .forms import GuestInvoiceForm, ItemFormSet
+from .forms import GuestInvoiceForm, ItemFormSet,CreateClientForm
 
 
 @login_required
@@ -132,6 +132,20 @@ def invoice_pdf(request, pk):
     response['Content-Disposition'] = f'filename=invoice_{invoice.id}.pdf'
     return response
     #return render(request, "invoices/invoice_pdf.html",{'invoice': invoice, "logo_url": f"{request.scheme}://{request.get_host()}/media/uploads/defaultlogo.png"})
+
+
+
+@login_required
+def create_new_client(request):
+    if request.method == 'POST':
+        form = CreateClientForm(request.POST)
+        if form.is_valid():
+            client = form.save(commit=False)
+            client.save()
+            return redirect("client_invoice_create")
+    else:
+        form = CreateClientForm()
+    return render(request, 'invoices/client_create.html', {'form': form})
 
 @login_required
 def dashboard(request):

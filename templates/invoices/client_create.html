@@ -1,0 +1,44 @@
+{% extends 'invoices/base.html' %}
+
+{% block content %}
+<h2>Add new client/customer to system</h2>
+<form id="client-create-form" action="{% url 'create_new_client' %}" class="border rounded p-2 m-2" method="post">
+  {% csrf_token %}
+  
+  <div class="row mb-3">
+    <div class="col">
+      {{ form.name.label_tag }} 
+      {{ form.name }}
+      {% if form.name.errors %}
+        <div class="text-danger">{{ form.name.errors }}</div>
+      {% endif %}
+    </div>
+    <div class="col">
+      {{ form.email.label_tag }} 
+      {{ form.email }}
+      {% if form.email.errors %}
+        <div class="text-danger">{{ form.email.errors }}</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="row mb-3">
+    <div class="col">
+      {{ form.place.label_tag }} 
+      {{ form.place }}
+      {% if form.place.errors %}
+        <div class="text-danger">{{ form.place.errors }}</div>
+      {% endif %}
+    </div>
+    <div class="col">
+      {{ form.phone.label_tag }} 
+      {{ form.phone }}
+      {% if form.phone.errors %}
+        <div class="text-danger">{{ form.phone.errors }}</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <button type="submit" class="btn btn-primary">Add Now</button>
+</form>
+{% endblock %}

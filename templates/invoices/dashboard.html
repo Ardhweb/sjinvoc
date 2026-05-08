@@ -22,30 +22,49 @@
 
             <!-- INVOICES LINK -->
             <a href="javascript:void(0)" 
+            onclick="setActive(this)"
+
                hx-get="{% url 'invoice_list' %}" 
                hx-target="#main-content" 
                hx-select="main, .container, #content-area"
-               class="list-group-item list-group-item-action bg-transparent text-white border-0 p-3">
+               class="list-group-item list-group-item-action bg-transparent text-white border-0 p-3"  data-label="Invoices">
                 <i class="bi bi-file-earmark-text me-2"></i> Invoices
+            </a>
+
+              <!-- CLIENTS LINK -->
+            <a href="javascript:void(0)" 
+               onclick="setActive(this)"
+               hx-get="{% url 'create_new_client' %}" 
+               hx-target="#main-content" 
+               hx-select="main, .container, #content-area"
+               class="list-group-item list-group-item-action bg-transparent text-white border-0 p-3">
+               <i class="bi bi-person-add me-2"></i></i> Add New Client
             </a>
 
             <!-- CLIENTS LINK -->
             <a href="javascript:void(0)" 
+               onclick="setActive(this)"
                hx-get="{% url 'client_invoice_create' %}" 
                hx-target="#main-content" 
                hx-select="main, .container, #content-area"
                class="list-group-item list-group-item-action bg-transparent text-white border-0 p-3">
-                <i class="bi bi-people me-2"></i> Clients
+                <i class="bi bi-people me-2"></i> Existing Clients Invoice
             </a>
 
             <!-- CLIENTS LINK -->
             <a href="javascript:void(0)" 
+               onclick="setActive(this)"
                hx-get="{% url 'guest_invoice_create' %}" 
                hx-target="#main-content" 
                hx-select="main, .container, #content-area"
                class="list-group-item list-group-item-action bg-transparent text-white border-0 p-3">
-                <i class="bi bi-people me-2"></i> Guest
+                <i class="bi bi-plus-circle-dotted me-2"></i> Guest Invoice
             </a>
+
+           
+
+
+
         </div>
     </div>
 
@@ -61,7 +80,12 @@
                 <span class="navbar-brand ms-3 mb-0 h1 fs-6">My Invoice System</span>
             </div>
         </nav>
-
+<!-- BREADCRUMB -->
+<nav aria-label="breadcrumb" class="px-3 pt-3">
+    <ol class="breadcrumb mb-0" id="breadcrumb">
+        <li class="breadcrumb-item active">Home</li>
+    </ol>
+</nav>
         <!-- DYNAMIC CONTENT HOLDER -->
         <div id="main-content" class="p-4">
             <!-- Initial Welcome Content -->
@@ -78,6 +102,35 @@
 </template>
 
 <script>
+
+// When the page loads, mark Home as active
+document.addEventListener('DOMContentLoaded', function() {
+    const homeLink = document.getElementById('home-link');
+    if(homeLink) {
+        homeLink.classList.add('active');
+
+        // Also set breadcrumb
+        const breadcrumb = document.getElementById('breadcrumb');
+        if(breadcrumb) {
+            breadcrumb.innerHTML = `<li class="breadcrumb-item active">Home</li>`;
+        }
+    }
+});
+
+    function setActive(clickedLink) {
+    // Remove 'active' class from all sidebar links
+    document.querySelectorAll('#sidebar .list-group-item').forEach(link => {
+        link.classList.remove('active');
+    });
+
+    // Add 'active' class to clicked link
+    clickedLink.classList.add('active');
+
+    // Update breadcrumb above main content
+    const breadcrumb = document.getElementById('breadcrumb');
+    const label = clickedLink.textContent.trim(); // Use link text as breadcrumb
+    breadcrumb.innerHTML = `<li class="breadcrumb-item active">${label}</li>`;
+}
     document.addEventListener('submit', function(e) {
     const mainContent = document.getElementById('main-content');
     
@@ -113,10 +166,13 @@
         const mainContent = document.getElementById('main-content');
         const homeTemplate = document.getElementById('home-template');
         mainContent.innerHTML = homeTemplate.innerHTML;
+
+        const homeLink = document.querySelector('#sidebar .list-group-item:first-child');
+    setActive(homeLink);
     }
 
 
-    // Add this inside your  tag in dashboard.html
+
 
 </script>
 {% endblock %}

@@ -20,6 +20,21 @@
 <!-- DataTables JS -->
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+<style>
+  
+  /* Sidebar active link styling */
+#sidebar .list-group-item.active {
+    background-color: #0d6efd; /* Bootstrap primary blue */
+    color: white !important;   /* Ensure text is visible */
+    font-weight: bold;
+    border-left: 4px solid #ffc107; /* Optional: highlight border */
+}
+
+#sidebar .list-group-item.active i {
+    color: white; /* Icon color for active link */
+}
+</style>
   </head>
   <body>
       {%include "partials/navbar.html"%}
