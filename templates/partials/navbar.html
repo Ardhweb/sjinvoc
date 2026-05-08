@@ -4,7 +4,7 @@
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav ms-auto">
                 {% if user.is_authenticated %}
-                <li class="nav-item"><a class="nav-link" href="{% url 'guest_invoice_create' %}">Guest Invoice</a></li>
+               
                 <li class="nav-item"><a class="nav-link" href="{% url 'client_invoice_create' %}">Client Invoice</a></li>
                 <li class="nav-item"><a class="nav-link" href="{% url 'invoice_list' %}">Invoice List</a></li>
                 <li class="nav-item"><a class="nav-link" href="{% url 'accounts:logout' %}">
@@ -12,6 +12,7 @@
                 Logout</a></li>
                 <li class="nav-item"><a class="nav-link">Hi, {{user.username}}</a></li>
                 {% else %}
+                 <li class="nav-item"><a class="nav-link" href="{% url 'guest_invoice_create' %}">Guest Invoice</a></li>
                 <li class="nav-item"><a class="nav-link" href="{% url 'accounts:login' %}">Login</a></li>
                 {% endif %}
             </ul>
