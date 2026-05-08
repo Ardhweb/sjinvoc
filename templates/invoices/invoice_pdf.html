@@ -1,0 +1,189 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 30px; 
+        }
+
+        /* Wrapper */
+        .wrapper {
+            margin: 0 auto;
+            width: 85%;
+            padding: 2rem;
+            border: 1px solid black;
+            border-radius: 4px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            font-size: 11px;
+            width: 100%;
+        }
+
+        /* Logo Column */
+        .logo-col img {
+            display: block;
+            max-height: 50px;
+            width: auto;
+            margin-bottom: 0.5rem;
+        }
+        .logo-col h1 {
+            margin: 0;
+            line-height: 1.1;
+            font-size: 16px;
+        }
+
+        /* Invoice info column */
+        .invoice-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            font-size: 11px;
+        }
+
+        /* Table */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        .table th, .table td {
+            
+            padding: 8px;
+            text-align: left;
+            vertical-align: top;
+        }
+        .table th {
+            background-color: #f2f2f2;
+        }
+
+        /* No border table (optional) */
+        .no-border-table tr, .no-border-table td, .no-border-table th {
+            border: none !important;
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        /* Total row */
+        .total-row td {
+            font-weight: bold;
+            text-align: right;
+            background-color: #f9f9f9;
+        }
+
+        /* Small footer text */
+        .footer-small {
+            font-size: x-small;
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+
+    <!-- Header -->
+    <div class="header">
+        <!-- Left Column: Logo -->
+        <div class="logo-col">
+            <img src="{{logo_url}}" alt="Logo">
+            <h1>SJ Hydraulics M.P.</h1>
+        </div>
+
+        <!-- Right Column: Invoice Info -->
+        <div class="invoice-info">
+            <div><strong>Invoice no:</strong>#{{invoice.id}}</div>
+            <div><strong>Date:</strong> {{invoice.date|date:"d/m/Y"}}</div>
+            {% if invoice.due_date %}
+            <div><strong>Due:</strong> {{ invoice.due_date|date:"d/m/Y"}}</div>
+            {% endif %}
+        </div>
+    </div>
+<div style="width: 100%; text-align: center;">
+    <small style="display: inline-block; font-size: x-small;">R210</small>
+</div>
+    <!-- Customer Info -->
+    <p style="margin:0;">
+        <strong>M/s:</strong>
+        {% if invoice.client %}
+            {{ invoice.client.name }}
+        {% else %}
+            {{ invoice.guest_client_name }}
+        {% endif %}
+    </p>
+
+    <!-- Invoice Table -->
+   <table class="table" style=" margin-top:9px;border-collapse: collapse; border: 2px solid black;">
+    <thead>
+        <tr style="border-bottom: 2px solid black;">
+            <th style="padding:5px; text-align:center;width: 36px; border-right: 2px solid black; ">No.</th>
+            <th style="padding:5px; text-align:center;border-right: 2px solid black; ">Description</th>
+            <th style="padding:5px; text-align:center;width: 4rem; border-right: 2px solid black; ">Qty</th>
+            <th style="padding:5px; text-align:center;width: 6rem; ">Amount</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in invoice.items.all %}
+        <tr >
+            <!-- 1. No. Column -->
+            <td style="border-right: 2px solid black; padding: 0; vertical-align: top; text-align: center;">
+                <div style="padding: 8px;">{{forloop.counter}}</div>
+                {% if forloop.last %}
+                <div style=" padding: 8px; margin-top: 20px; background-color: #f9f9f9;">
+                    &nbsp; <!-- Empty spacer to maintain height -->
+                </div>
+                {% endif %}
+            </td>
+           <!-- Description Column with Infused 'Total' Label -->
+            <td style="border-right: 2px solid black; padding: 0; vertical-align: top;">
+                <div style="padding: 8px;">{{ item.item_name }}</div>
+                {% if forloop.last %}
+                <div style=" padding: 8px; margin-top: 20rem; font-weight: bold; text-align: right; background-color: #f9f9f9;">
+                    TOTAL:
+                </div>
+                {% endif %}
+            </td>
+           <!-- 1. No. Column -->
+            <td style="border-right: 2px solid black; padding: 0; vertical-align: top; text-align: center;">
+                <div style="padding: 8px;">{{item.quantity}}</div>
+                {% if forloop.last %}
+                <div style=" padding: 8px; margin-top: 20px; background-color: #f9f9f9;">
+                    &nbsp; <!-- Empty spacer to maintain height -->
+                </div>
+                {% endif %}
+            </td>
+            <td style="padding: 0; vertical-align: top; position: relative;">
+                <!-- Item Amount -->
+                <div style="padding: 8px;">{{ item.total }}</div>
+                
+                {% if forloop.last %}
+                <!-- Infused Total Box -->
+                <div style="border-top: 2px solid black; background-color: #f9f9f9;  margin-top: 20rem;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr>
+                            <!-- <td style="padding: 5px; font-weight: bold; border-right: 1px solid black;">Total</td> -->
+                            <td style="padding: 5px;  font-weight: bold; text-align: left;">{{ invoice.total|floatformat }}<small style="font-size:x-small;">/-Rs</small></td>
+                        </tr>
+                    </table>
+                </div>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+  
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!-- invoices/dashboard_home.html -->
+<div id="welcome-screen" class="text-center" style="margin-top: 10vh;">
+    <i class="bi bi-speedometer2 text-primary" style="font-size: 4rem;"></i>
+    <h2 class="mt-3">Welcome to the Dashboard</h2>
+    <p class="text-muted">Select a module from the sidebar to manage your invoices and clients.</p>
+    
+    <div class="d-flex justify-content-center gap-3 mt-4">
+        <div class="p-4 bg-white border rounded shadow-sm" style="width: 200px;">
+            <h3 class="text-primary">{{ invoice_count|default:"0" }}</h3>
+            <span class="text-muted">Invoices</span>
+        </div>
+        <div class="p-4 bg-white border rounded shadow-sm" style="width: 200px;">
+            <h3 class="text-success">{{ client_count|default:"0" }}</h3>
+            <span class="text-muted">Clients</span>
+        </div>
+         <div class="p-4 bg-white border rounded shadow-sm" style="width: 200px;">
+            <h3 class="text-danger">{{ pending_count|default:"0" }}</h3>
+            <span class="text-muted">Due & pending invoice</span>
+        </div>
+    </div>
+
+     
+</div>

@@ -1,0 +1,122 @@
+{% extends 'invoices/base.html' %}
+
+{% block content %}
+<!-- Load HTMX -->
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+<div id="layout-wrapper" style="display: flex; min-height: 100vh; width: 100%; background: #f8f9fa;">
+    
+    <!-- SIDEBAR -->
+    <div id="sidebar" style="width: 250px; min-width: 250px; background: #212529; color: white; transition: 0.3s; overflow: hidden; display: flex; flex-direction: column;">
+      <!--   <div style="padding: 20px; border-bottom: 1px solid #3d4145;">
+            <h6 style="margin: 0; white-space: nowrap;">ADMIN PANEL</h6>
+        </div> -->
+
+        <div class="list-group list-group-flush">
+            <!-- FIXED HOME LINK: No URL needed, just calls the JS function below -->
+            <a href="javascript:void(0)" 
+               onclick="showHome()"
+               class="list-group-item list-group-item-action bg-transparent text-white border-0 p-3">
+                <i class="bi bi-house-door me-2"></i> Home
+            </a>
+
+            <!-- INVOICES LINK -->
+            <a href="javascript:void(0)" 
+               hx-get="{% url 'invoice_list' %}" 
+               hx-target="#main-content" 
+               hx-select="main, .container, #content-area"
+               class="list-group-item list-group-item-action bg-transparent text-white border-0 p-3">
+                <i class="bi bi-file-earmark-text me-2"></i> Invoices
+            </a>
+
+            <!-- CLIENTS LINK -->
+            <a href="javascript:void(0)" 
+               hx-get="{% url 'client_invoice_create' %}" 
+               hx-target="#main-content" 
+               hx-select="main, .container, #content-area"
+               class="list-group-item list-group-item-action bg-transparent text-white border-0 p-3">
+                <i class="bi bi-people me-2"></i> Clients
+            </a>
+
+            <!-- CLIENTS LINK -->
+            <a href="javascript:void(0)" 
+               hx-get="{% url 'guest_invoice_create' %}" 
+               hx-target="#main-content" 
+               hx-select="main, .container, #content-area"
+               class="list-group-item list-group-item-action bg-transparent text-white border-0 p-3">
+                <i class="bi bi-people me-2"></i> Guest
+            </a>
+        </div>
+    </div>
+
+    <!-- MAIN AREA -->
+    <div style="flex-grow: 1; display: flex; flex-direction: column;">
+        
+        <!-- NAVBAR -->
+        <nav class="navbar navbar-light bg-white border-bottom px-3" style="height: 60px;">
+            <div class="container-fluid">
+                <button class="btn btn-outline-dark border-0" type="button" onclick="toggleSidebar()">
+                    <i class="bi bi-list fs-4"></i>
+                </button>
+                <span class="navbar-brand ms-3 mb-0 h1 fs-6">My Invoice System</span>
+            </div>
+        </nav>
+
+        <!-- DYNAMIC CONTENT HOLDER -->
+        <div id="main-content" class="p-4">
+            <!-- Initial Welcome Content -->
+            <div id="welcome-content">
+                {% include 'partials/invoices_dashboard_home.html' %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- HIDDEN TEMPLATE: This stores a copy of your home screen so we can "reset" it later -->
+<template id="home-template">
+    {% include 'partials/invoices_dashboard_home.html' %}
+</template>
+
+<script>
+    document.addEventListener('submit', function(e) {
+    const mainContent = document.getElementById('main-content');
+    
+    if (mainContent.contains(e.target)) {
+        e.preventDefault();
+        const form = e.target;
+
+        htmx.ajax('POST', form.action, {
+            source: form,
+            target: '#main-content', // Where to put the detail page
+            swap: 'innerHTML',
+            values: new FormData(form),
+            // 🚀 This tells HTMX: "Go to the detail page, but only grab #content-area"
+            select: '#content-area' 
+        });
+    }
+});
+    // 1. Sidebar Toggle
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar.style.width === '250px' || sidebar.style.width === '') {
+            sidebar.style.width = '0px';
+            sidebar.style.minWidth = '0px';
+        } else {
+            sidebar.style.width = '250px';
+            sidebar.style.minWidth = '250px';
+        }
+    }
+
+    // 2. BACK TO HOME FUNCTION:
+    // This takes the HTML from our hidden template and puts it back in the content area.
+    function showHome() {
+        const mainContent = document.getElementById('main-content');
+        const homeTemplate = document.getElementById('home-template');
+        mainContent.innerHTML = homeTemplate.innerHTML;
+    }
+
+
+    // Add this inside your  tag in dashboard.html
+
+</script>
+{% endblock %}

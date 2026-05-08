@@ -1,0 +1,54 @@
+
+
+
+{% extends 'invoices/base.html' %}
+{% if request.headers.hx_request %}
+{% block content %}
+<div class="d-flex flex-row justify-content-between pt-2 m-2">
+    <h2>Invoices</h2>
+ <a href="" class="btn btn-primary">Create New Invoice</a>
+</div>
+<table id="myTable" class="table table-striped mt-3">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Client</th>
+            <th>Date</th>
+            <th>Due Date</th>
+            <th>Total</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for invoice in invoices %}
+        <tr>
+            <td>{{ invoice.id }}</td>
+            <td>{% if invoice.client %}
+    {{ invoice.client.name }}
+{% else %}
+    {{ invoice.guest_client_name }}
+{% endif %}</td>
+            <td>{{ invoice.date }}</td>
+            <td>{{ invoice.due_date }}</td>
+            <td>{{ invoice.total }}</td>
+            <td>
+                <a class="btn btn-sm btn-info" href="{% url 'invoice_detail' invoice.id %}">View</a>
+                <a class="btn btn-sm btn-success" href="{% url 'invoice_pdf' invoice.id %}">PDF</a>
+            </td>
+        </tr>
+    {% empty %}
+        <tr><td colspan="6" class="text-center">No invoices found.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<script>
+  $(document).ready(function() {
+    $('#myTable').DataTable({
+      "paging": true,       // Enable pagination
+      "pageLength": 5       // Rows per page
+    });
+  });
+</script>
+{% endblock %}
+{%endif%}

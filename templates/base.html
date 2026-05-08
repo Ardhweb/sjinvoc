@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{%block title%}{%endblock title%}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
+   
+  </head>
+  <body>
+    {%include "partials/navbar.html"%}
+    {% load static %}
+
+<!-- Hero Section: Digital Invoicing -->
+<div class="position-relative overflow-hidden p-3 p-md-5 text-center bg-dark" 
+     style="background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+            url('https://images.unsplash.com/photo-1554224155-6726b3ff858f?q=80&w=2011&auto=format&fit=crop'); 
+            background-size: cover; 
+            background-position: center; 
+            min-height: 60vh; 
+            display: flex; 
+            align-items: center;">
+            
+  <div class="col-md-8 p-lg-5 mx-auto my-5 text-white">
+    <!-- Icon or Small Badge -->
+    <div class="mb-3">
+        <span class="badge rounded-pill bg-primary px-3 py-2 text-uppercase">Paperless Workflow</span>
+    </div>
+    
+    <!-- <h1 class="display-3 fw-bold mb-3">Smart Digital Invoicing</h1> -->
+    <h1 class="display-4 fw-bold mb-3">
+    Smart <span id="typed-text" class="text-primary" style="color:rgb(255 156 98)!important"></span>
+</h1>
+    <p class="lead fw-normal mb-4">
+        Automate your financial tracking with scalable, role-based access. 
+        Generate professional summaries and manage permissions seamlessly.
+    </p>
+    
+    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+      {% if user.is_authenticated %}
+      <!-- If logged in, go to the client URL -->
+      <a href="{% url 'client_invoice_create' %}" class="btn btn-primary btn-lg px-5 py-3 fw-bold shadow-sm">
+          Create New Invoice
+      </a>
+  {% else %}
+      <!-- If not logged in, go to the guest URL -->
+      <a href="{% url 'guest_invoice_create' %}" class="btn btn-primary btn-lg px-5 py-3 fw-bold shadow-sm">
+           Create New Invoice
+      </a>
+  {% endif %}
+      <a href="{% url 'dashboard' %}" class="btn btn-outline-light btn-lg px-5 py-3 shadow-sm">View Analytics</a>
+    </div>
+  </div>
+</div>
+
+<!-- Features Section -->
+<div class="container my-5">
+    <div class="row g-4 py-5 row-cols-1 row-cols-lg-3">
+      <div class="col d-flex align-items-start">
+        <div>
+          <h3 class="fs-4 fw-bold">Invoice PDF</h3>
+          <p>Download professional invoices as high-quality PDFs instantly. Completely free of cost with no watermarks or hidden fees.</p>
+        </div>
+      </div>
+      <div class="col d-flex align-items-start">
+        <div>
+          <h3 class="fs-4 fw-bold">Automated Summaries</h3>
+          <p>Instant financial tracking and report generation.</p>
+        </div>
+      </div>
+      <div class="col d-flex align-items-start">
+        <div>
+          <h3 class="fs-4 fw-bold">No-Setup 100%Free</h3>
+          <p>No account or sign-up required. Use the tool immediately without sharing personal data—your data stays yours.</p>
+        </div>
+      </div>
+    </div>
+</div>
+ {% block content %}
+ {% endblock %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+  <script>
+  var typed = new Typed('#typed-text', {
+    strings: [
+        'Digital Invoicing', 
+        'Financial Tracking', 
+        'PDF Generation',
+        'Data Privacy'
+    ],
+    typeSpeed: 60,      // Speed in milliseconds
+    backSpeed: 40,      // Backspacing speed
+    backDelay: 2000,    // Time before backspacing
+    loop: true,         // Keep repeating
+    cursorChar: '|',    // The blinking cursor
+  });
+</script>
+  </body>
+</html>
