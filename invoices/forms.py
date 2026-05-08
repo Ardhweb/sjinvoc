@@ -31,7 +31,20 @@ ItemFormSet = inlineformset_factory(
 class ClientInvoiceForm(forms.ModelForm):
     class Meta:
         model = Invoice
-        fields = ['client', 'due_date']
+        fields = ['client', 'due_date', 'status']
+        widgets = {
+            'status': forms.Select(attrs={'class': 'form-control'}),
+            'due_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'client': forms.Select(attrs={'class': 'form-control'})
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            # store label class in field for template use
+            field.label_suffix = ''  # optional: remove colon
+            #field.widget.attrs['label_class'] = 'fw-semibold'
+            field.label_class = 'fw-semibold'
 
 
 
