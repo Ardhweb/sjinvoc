@@ -8,7 +8,7 @@ https://docs.djangoproject.com/en/6.0/howto/deployment/wsgi/
 """
 
 import os
-
+import sys
 from django.core.wsgi import get_wsgi_application
 path = '/home/sjinvoc/sjinvoc'
 if path not in sys.path:
