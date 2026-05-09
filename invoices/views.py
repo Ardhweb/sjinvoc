@@ -7,13 +7,16 @@ from datetime import  date
 from django.conf import settings
 from django.http import HttpResponse
 from django.template.loader import render_to_string
-import weasyprint,os
+import weasyprint,os,sys
 from weasyprint import HTML
 from datetime import date,datetime
 from django.shortcuts import render, redirect
 from .models import Invoice, Item
 from .forms import GuestInvoiceForm, ItemFormSet,CreateClientForm
 from django.contrib.admin.views.decorators import staff_member_required
+import platform
+from pathlib import Path
+
 
 @login_required
 def invoice_list(request):
@@ -187,14 +190,23 @@ def invoice_pdf(request, pk):
     logo_path = os.path.join(settings.MEDIA_ROOT, 'defaultlogo.png')
     if not os.path.exists(logo_path):
         print(f"DEBUG: File not found at {logo_path}")
+    #Check if we're on Windows (likely your local dev environment)
+    if platform.system() == 'Windows':
+        logo_url = Path(logo_path).as_uri()
+    else:
+        logo_url = settings.MEDIA_URL + 'defaultlogo.png'
+
+    # Now you can pass logo_url to your template
+    print("Logo URL to use:", logo_url)
     if not (invoice.created_by == request.user or request.user.is_staff or request.user.is_superuser):
         return HttpResponse("You are not authorized to view this invoice.", status=403)
-    html_string = render_to_string('invoices/invoice_pdf.html', {'invoice': invoice, "logo_url": logo_path})
+    html_string = render_to_string('invoices/invoice_pdf.html', {'invoice': invoice, "logo_url": logo_url})
     html = HTML(string=html_string,base_url=settings.MEDIA_ROOT)
     pdf = html.write_pdf()
     response = HttpResponse(pdf, content_type='application/pdf')
     response['Content-Disposition'] = f'filename=invoice_{invoice.id}.pdf'
     return response
+    #return render(request,'invoices/invoice_pdf.html', {'invoice': invoice, "logo_url": logo_url})
 
 
 
