@@ -185,15 +185,18 @@ def invoice_detail(request, pk):
 def invoice_pdf(request, pk):
     invoice = get_object_or_404(Invoice, pk=pk)
     logo_path = os.path.join(settings.MEDIA_ROOT, 'defaultlogo.png')
+    if not os.path.exists(logo_path):
+        print(f"DEBUG: File not found at {logo_path}")
     if not (invoice.created_by == request.user or request.user.is_staff or request.user.is_superuser):
         return HttpResponse("You are not authorized to view this invoice.", status=403)
-    html_string = render_to_string('invoices/invoice_pdf.html', {'invoice': invoice, "logo_url": f"{request.scheme}://{request.get_host()}/media/uploads/defaultlogo.png"})
+    html_string = render_to_string('invoices/invoice_pdf.html', {'invoice': invoice, 
+    "logo_url": f"{request.scheme}://{request.get_host()}/media/defaultlogo.png"})
     html = HTML(string=html_string,base_url=settings.MEDIA_ROOT)
     pdf = html.write_pdf()
     response = HttpResponse(pdf, content_type='application/pdf')
     response['Content-Disposition'] = f'filename=invoice_{invoice.id}.pdf'
     return response
-    #return render(request, "invoices/invoice_pdf.html",{'invoice': invoice, "logo_url": f"{request.scheme}://{request.get_host()}/media/uploads/defaultlogo.png"})
+    #return render(request, "invoices/invoice_pdf.html",{'invoice': invoice, "logo_url": f"{request.scheme}://{request.get_host()}/media/defaultlogo.png"})
 
 
 
