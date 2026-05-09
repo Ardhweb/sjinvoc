@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-oxg+(&83rikgzz@bwp-k=@f9@xnv%hm-_0^ob0r@%lvhw)1b!m
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*', 'sjinvoc.pythonanywhere.com']
 
 
 # Application definition
@@ -125,7 +125,7 @@ STATICFILES_DIRS = [
 
 print(f"{BASE_DIR}")
 MEDIA_ROOT  = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/media/uploads/'
+MEDIA_URL = '/media/'
 
 
 SITE_NAME = 'EasyCommerce'
