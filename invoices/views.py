@@ -192,8 +192,8 @@ def invoice_pdf(request, pk):
     pdf = html.write_pdf()
     response = HttpResponse(pdf, content_type='application/pdf')
     response['Content-Disposition'] = f'filename=invoice_{invoice.id}.pdf'
-    return response
-    #return render(request, "invoices/invoice_pdf.html",{'invoice': invoice, "logo_url": f"{request.scheme}://{request.get_host()}/media/uploads/defaultlogo.png"})
+    #return response
+    return render(request, "invoices/invoice_pdf.html",{'invoice': invoice, "logo_url": f"{request.scheme}://{request.get_host()}/media/uploads/defaultlogo.png"})
 
 
 
