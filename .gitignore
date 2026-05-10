@@ -1,0 +1,41 @@
+# Environment files
+.env
+.env.*
+*.env
+
+# Local settings
+local_settings.py
+
+# Production secrets
+production.py
+prod.py
+
+# Virtual environment
+venv/
+.env/
+
+# Django secret files
+secret_key.txt
+secrets.json
+
+# dotenv files
+.env
+.env.local
+.env.production
+.env.development
+
+# OS / editor
+__pycache__/
+*.pyc
+.vscode/
+.idea/
+
+# Database
+#db.sqlite3
+
+# Static/media
+#media/
+#staticfiles/
+
+# Virtualenv
+venv/
