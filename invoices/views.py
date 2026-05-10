@@ -86,8 +86,11 @@ def guest_invoice_create(request):
             #     # We can use a custom header to tell the frontend to stay in the dashboard
             #     return response
             
-            # Redirect to a "success page" or invoice detail page
-            return redirect('invoice_detail', pk=invoice.id)
+            if not request.user.is_authenticated:
+                return redirect('guest_invoice_detail', special_id=invoice.special_uid)
+            else:
+                # Redirect to a "success page" or invoice detail page
+                return redirect('invoice_detail', pk=invoice.id)
     
     else:
         form = GuestInvoiceForm()
@@ -160,8 +163,7 @@ def client_invoice_create(request):
             #     response = redirect('invoice_detail', pk=invoice.pk)
             #     # We can use a custom header to tell the frontend to stay in the dashboard
             #     return response
-            
-            # Redirect to a "success page" or invoice detail page
+
             return redirect('invoice_detail', pk=invoice.id)
 
     
@@ -204,7 +206,34 @@ def invoice_pdf(request, pk):
     return response
     #return render(request,'invoices/invoice_pdf.html', {'invoice': invoice, "logo_url": logo_url})
 
+def guest_invoice_detail(request, special_id):
+    invoice = get_object_or_404(Invoice, special_uid=special_id)
 
+    # # Allow guest access if invoice has no owner
+    # if invoice.created_by is not None and not (
+    #     invoice.created_by == request.user or request.user.is_staff or request.user.is_superuser
+    # ):
+    #     return HttpResponse("You are not authorized to view this invoice.", status=403)
+
+    return render(request, 'invoices/invoice_detail.html', {'invoice': invoice})
+
+
+def guest_invoice_pdf(request, special_id):
+    invoice = get_object_or_404(Invoice, special_uid=special_id)
+    logo_path = os.path.join(settings.MEDIA_ROOT, 'defaultlogo.png')
+    if not os.path.exists(logo_path):
+        print(f"DEBUG: File not found at {logo_path}")
+    #Check if we're on Windows (likely your local dev environment)
+    if platform.system() == 'Windows':
+        logo_url = Path(logo_path).as_uri()
+    else:
+        logo_url = logo_path
+    html_string = render_to_string('invoices/invoice_pdf.html', {'invoice': invoice, "logo_url": logo_url})
+    html = HTML(string=html_string,base_url=settings.MEDIA_ROOT)
+    pdf = html.write_pdf()
+    response = HttpResponse(pdf, content_type='application/pdf')
+    response['Content-Disposition'] = f'filename=invoice_{invoice.id}.pdf'
+    return response
 
 
 @login_required

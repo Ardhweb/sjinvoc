@@ -2,7 +2,8 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.contrib.auth.models import User
 from datetime import date
-from datetime import date
+import uuid 
+
 def current_year():
     from datetime import date
     return date.today().year
@@ -25,6 +26,15 @@ class Invoice(models.Model):
         ('already_paid', 'Already Paid (No Due)'),
         ('due_paid', 'Previously Due, Now Paid (No Due)'),
     ]
+    special_uid = models.UUIDField(
+        default=uuid.uuid4, 
+        editable=False
+    )
+    image = models.ImageField(
+        upload_to='',
+        blank=True,          
+        null=True            
+    )
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     client = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True, blank=True)
     guest_client_name = models.CharField(max_length=200, blank=True)  # For guest invoices
