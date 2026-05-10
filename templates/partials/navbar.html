@@ -1,21 +1,39 @@
- <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="{% url 'home' %}">Shri Jawala Invoc</a>
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav ms-auto">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark py-2">
+    <div class="container-fluid {% if '/dashboard' in request.path %}flex-nowrap{% endif %}">
+        
+        <!-- Brand Name: Shortens automatically on Dashboard -->
+        <a class="navbar-brand fw-bold" href="{% url 'home' %}" style="font-size: clamp(1rem, 4vw, 1.25rem);">
+            Shri Jawala Invoc 
+        </a>
+
+            <!-- NORMAL MODE: Standard Bootstrap Hamburger -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                 <ul class="navbar-nav ms-auto">
                 {% if user.is_authenticated %}
                
-                <li class="nav-item"><a class="nav-link" href="{% url 'client_invoice_create' %}">Client Invoice</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'client_invoice_create' %}">New Invoice</a></li>
                 <li class="nav-item"><a class="nav-link" href="{% url 'invoice_list' %}">Invoice List</a></li>
                 <li class="nav-item"><a class="nav-link" href="{% url 'accounts:logout' %}">
                 <li class="nav-item"><a class="nav-link" href="{% url 'accounts:logout' %}">
                 Logout</a></li>
                 <li class="nav-item"><a class="nav-link">Hi, {{user.username}}</a></li>
                 {% else %}
-                 <li class="nav-item"><a class="nav-link" href="{% url 'guest_invoice_create' %}">Guest Invoice</a></li>
+                 <li class="nav-item"><a class="nav-link" href="{% url 'guest_invoice_create' %}">New Invoice</a></li>
                 <li class="nav-item"><a class="nav-link" href="{% url 'accounts:login' %}">Login</a></li>
                 {% endif %}
             </ul>
-        </div>
+            </div>
+        
     </div>
 </nav>
+
+<style>
+    /* Hides scrollbar for the dashboard swipe menu */
+    .flex-row::-webkit-scrollbar {
+        display: none;
+    }
+</style>

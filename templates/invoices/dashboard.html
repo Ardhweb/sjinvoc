@@ -1,4 +1,7 @@
 {% extends 'invoices/base.html' %}
+{% block navbar %}
+
+{% endblock navbar %}
 
 {% block content %}
 <!-- Load HTMX -->
@@ -7,17 +10,22 @@
 <div id="layout-wrapper" style="display: flex; min-height: 100vh; width: 100%; background: #f8f9fa;">
     
     <!-- SIDEBAR -->
-    <div id="sidebar" style="width: 250px; min-width: 250px; background: #212529; color: white; transition: 0.3s; overflow: hidden; display: flex; flex-direction: column;">
-      <!--   <div style="padding: 20px; border-bottom: 1px solid #3d4145;">
-            <h6 style="margin: 0; white-space: nowrap;">ADMIN PANEL</h6>
-        </div> -->
+    <div id="sidebar" style="width: 0px; min-width: 0px; background: #212529; color: white; transition: 0.3s; overflow: hidden; display: flex; flex-direction: column;">
+      <div style=" border-bottom: 1px solid #3d4145;">
+            <a class="list-group-item list-group-item-action bg-transparent text-white border-0 p-3" href="/" style="margin: 0; white-space: nowrap;"><span class="d-inline d-lg-none">SJI</span>
+        <span class="d-none d-lg-inline">Shri Jawala Invoc</span></a>
+        </div> 
 
         <div class="list-group list-group-flush">
             <!-- FIXED HOME LINK: No URL needed, just calls the JS function below -->
-            <a href="javascript:void(0)" 
-               onclick="showHome()"
+            <a href="/" 
                class="list-group-item list-group-item-action bg-transparent text-white border-0 p-3">
                 <i class="bi bi-house-door me-2"></i> Home
+            </a>
+            <a id="home-link" href="javascript:void(0)" 
+               onclick="showDashBoard()"
+               class="list-group-item list-group-item-action bg-transparent text-white border-0 p-3">
+               <i class="bi bi-columns-gap me-2"></i></i> Dashboard
             </a>
 
             <!-- INVOICES LINK -->
@@ -58,7 +66,7 @@
                hx-target="#main-content" 
                hx-select="main, .container, #content-area"
                class="list-group-item list-group-item-action bg-transparent text-white border-0 p-3">
-                <i class="bi bi-plus-circle-dotted me-2"></i> Guest Invoice
+                <i class="bi bi-receipt-cutoff me-2"></i></i> Guest Invoice
             </a>
 
            
@@ -72,13 +80,27 @@
     <div style="flex-grow: 1; display: flex; flex-direction: column;">
         
         <!-- NAVBAR -->
-        <nav class="navbar navbar-light bg-white border-bottom px-3" style="height: 60px;">
-            <div class="container-fluid">
+        <nav class="navbar navbar-light bg-white border-bottom " style="height: 60px;">
+            <div class="container-fluid d-flex flex-nowrap align-items-center">
                 <button class="btn btn-outline-dark border-0" type="button" onclick="toggleSidebar()">
                     <i class="bi bi-list fs-4"></i>
                 </button>
                 <span class="navbar-brand ms-3 mb-0 h1 fs-6">My Invoice System</span>
+
+                <!-- DASHBOARD MODE: Inline Scroll (No Hamburger) -->
+            <ul class="navbar-nav flex-row ms-auto align-items-center" 
+                style="overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; -ms-overflow-style: none;">
+                
+                <li class="nav-item"><a class="nav-link px-2" href="{% url 'client_invoice_create' %}" style="font-size: 0.85rem;">New Invoice</a></li>
+                <li class="nav-item"><a class="nav-link px-2" href="{% url 'invoice_list' %}" style="font-size: 0.85rem;">List</a></li>
+                <li class="nav-item"><a class="nav-link px-2" href="{% url 'accounts:logout' %}" style="font-size: 0.85rem;">Logout</a></li>
+                <li class="nav-item ms-2">
+                    <span class="badge bg-secondary fw-normal">{{ user.username }}</span>
+                </li>
+            </ul>
             </div>
+
+            
         </nav>
 <!-- BREADCRUMB -->
 <nav aria-label="breadcrumb" class="px-3 pt-3">
@@ -112,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Also set breadcrumb
         const breadcrumb = document.getElementById('breadcrumb');
         if(breadcrumb) {
-            breadcrumb.innerHTML = `<li class="breadcrumb-item active">Home</li>`;
+            breadcrumb.innerHTML = `<li class="breadcrumb-item active">Dashboard</li>`;
         }
     }
 });
@@ -162,7 +184,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 2. BACK TO HOME FUNCTION:
     // This takes the HTML from our hidden template and puts it back in the content area.
-    function showHome() {
+    function showDashBoard() {
         const mainContent = document.getElementById('main-content');
         const homeTemplate = document.getElementById('home-template');
         mainContent.innerHTML = homeTemplate.innerHTML;
