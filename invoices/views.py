@@ -163,6 +163,7 @@ def client_invoice_create(request):
             
             # Redirect to a "success page" or invoice detail page
             return redirect('invoice_detail', pk=invoice.id)
+
     
     else:
         form = ClientInvoiceForm()

@@ -21,6 +21,7 @@ if ENVIRONMENT == 'production':
     env_path = BASE_DIR / '.env.production'
 else:
     env_path = BASE_DIR / '.env.local'
+print(ENVIRONMENT)
 
 load_dotenv(dotenv_path=env_path)
 # Quick-start development settings - unsuitable for production
@@ -30,7 +31,8 @@ load_dotenv(dotenv_path=env_path)
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG') == 'True'
+DEBUG = os.getenv('DEBUG')
+print(DEBUG)
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
 
