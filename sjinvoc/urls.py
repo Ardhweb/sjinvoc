@@ -21,7 +21,7 @@ from django.conf.urls.static import static #For Media Manging and Static step4
 #from django.conf.urls import url
 from django.views.generic import TemplateView
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('internal-admin/control/', admin.site.urls),
     path('invoices/' ,include("invoices.urls")),
     path('accounts/' ,include("accounts.urls")),
     path('', TemplateView.as_view(template_name="index.html"), name='home'),
