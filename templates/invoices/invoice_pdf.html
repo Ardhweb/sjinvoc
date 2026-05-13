@@ -110,7 +110,13 @@
         </div>
     </div>
 <div style="width: 100%; text-align: center;">
-    <small style="display: inline-block; font-size: x-small;">R210</small>
+    <small style="display: inline-block; font-size: x-small;">
+        {% if invoice.context_title %}
+            {{ invoice.context_title }}
+        {% else %}
+            Statement
+        {% endif %}
+    </small>
 </div>
     <!-- Customer Info -->
     <p style="margin:0;">

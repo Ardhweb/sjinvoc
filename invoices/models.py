@@ -18,6 +18,10 @@ class Client(models.Model):
         return self.name
 
 
+class InvoiceLabel(models.Model):
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    invoice_label_title = models.CharField(max_length=200)
+
 class Invoice(models.Model):
     STATUS_CHOICES = [
         ('paid_upfront', 'Paid Upfront (No Due)'),
@@ -47,6 +51,34 @@ class Invoice(models.Model):
     invoice_no = models.PositiveIntegerField(null=True, blank=True, editable=False)
     year = models.PositiveIntegerField(default=current_year, editable=False)
     suffix = models.CharField(max_length=10, blank=True, null=True)
+    
+    invoice_label =models.ForeignKey(InvoiceLabel, on_delete=models.SET_NULL, null=True, blank=True)
+    
+    context_title = models.CharField(
+        max_length=255, 
+        blank=True, 
+        help_text="Specific subject (e.g., Machine Name, Project Code, or Service Type)"
+    )
+
+    # Updated Alignment Choices
+    LABEL_ALIGNMENT = [
+        ('LEFT', 'Left Aligned'),
+        ('CENTER', 'Centered'),
+        ('RIGHT', 'Right Aligned'),
+    ]
+    
+    header_style = models.CharField(
+        max_length=10, 
+        choices=LABEL_ALIGNMENT, 
+        default='CENTER'  # Now defaults to Center
+    )
+    slug = models.SlugField(
+        max_length=300, 
+        unique=True, 
+        blank=True,
+        null=True, 
+        editable=True # Set to False if you want to hide it from the Admin form
+    )
 
     def save(self, *args, **kwargs):
         # Handle invoice_no auto-increment per year

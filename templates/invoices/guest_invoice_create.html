@@ -44,6 +44,14 @@
                     <input type="text" class="form-control fit-content" value="{{ preview_invoice_no }}" readonly style="width: 180px;">
                     <small class="text-muted d-block">This will be your invoice number when you submit.</small>
                 </div>
+
+                <!--Context Title -->
+                <div class="col-auto">
+                    {{ form.context_title.label_tag }}
+                    {{ form.context_title }}
+                </div>
+
+                
             </div>
         </div>
 

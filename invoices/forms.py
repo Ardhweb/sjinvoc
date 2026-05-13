@@ -8,11 +8,13 @@ from .models import Invoice, Item, Client
 class GuestInvoiceForm(forms.ModelForm):
     class Meta:
         model = Invoice
-        fields = ['guest_client_name', 'due_date', 'status']
+        fields = ['guest_client_name', 'due_date', 'status', 'context_title']
         widgets = {
             'status': forms.Select(attrs={'class': 'form-control'}),
             'due_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-            'guest_client_name': forms.TextInput(attrs={'class': 'form-control'})
+            'guest_client_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'context_title': forms.TextInput(attrs={'class': 'form-control'}),
+            #'header_style': forms.Select(attrs={'class': 'form-control'}),
         }
 
 ItemFormSet = inlineformset_factory(
