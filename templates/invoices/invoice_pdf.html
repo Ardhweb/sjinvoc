@@ -139,7 +139,12 @@
         </tr>
     </thead>
     <tbody>
-        {% for item in invoice.items.all %}
+        {% comment %}
+     {% for item in invoice.items.all %} 
+{% endcomment %}
+       
+        {% for item in invoice.active_items %}
+      
         <tr >
             <!-- 1. No. Column -->
             <td style="border-right: 2px solid black; padding: 0; vertical-align: top; text-align: center;">
@@ -185,6 +190,7 @@
                 {% endif %}
             </td>
         </tr>
+       
         {% endfor %}
     </tbody>
 </table>

@@ -33,6 +33,7 @@
     </thead>
     <tbody>
         {% for item in invoice.items.all %}
+        {% if item.is_active %}
         <tr>
             <td style="width:0.5rem">{{forloop.counter}}</td>
             <td  style="width:16rem;" class="text-nowrap">{{ item.item_name}}</td>
@@ -40,6 +41,7 @@
             <td  style="width:8rem;">{{ item.price }}</td>
             <td style="width:6rem;">{{ item.total }}</td>
         </tr>
+        {% endif %}
         {% empty %}
         <tr><td colspan="4" class="text-center">No items added.</td></tr>
         {% endfor %}

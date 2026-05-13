@@ -1,8 +1,7 @@
 from django import forms
 from .models import Invoice, Client
-
 from django import forms
-from django.forms import inlineformset_factory
+from django.forms import inlineformset_factory,models
 from .models import Invoice, Item, Client
 
 class GuestInvoiceForm(forms.ModelForm):
@@ -17,9 +16,16 @@ class GuestInvoiceForm(forms.ModelForm):
             #'header_style': forms.Select(attrs={'class': 'form-control'}),
         }
 
+# class BaseItemFormSet(models.BaseInlineFormSet):
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         # Only show items where is_active is True
+#         self.queryset = self.instance.items.filter(is_active=True)
+
 ItemFormSet = inlineformset_factory(
     Invoice,
     Item,
+    #formset=BaseItemFormSet,
     fields=['item_name', 'quantity', 'price'],
     extra=1,
     can_delete=True,
@@ -49,7 +55,24 @@ class ClientInvoiceForm(forms.ModelForm):
             field.label_class = 'fw-semibold'
 
 
+class EditInvoiceForm(forms.ModelForm):
+    class Meta:
+        model = Invoice
+        fields = ['guest_client_name','client', 'due_date', 'status']
+        widgets = {
+            'guest_client_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'status': forms.Select(attrs={'class': 'form-control'}),
+            'due_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'client': forms.Select(attrs={'class': 'form-control'})
+        }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            # store label class in field for template use
+            field.label_suffix = ''  # optional: remove colon
+            #field.widget.attrs['label_class'] = 'fw-semibold'
+            field.label_class = 'fw-semibold'
 class CreateClientForm(forms.ModelForm):
     class Meta:
         model = Client

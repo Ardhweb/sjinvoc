@@ -2,7 +2,7 @@ from django.shortcuts import render,redirect,get_object_or_404
 from django.contrib.auth.decorators import login_required
 # Create your views here.
 from .models import Invoice, Client, Item
-from  .forms import GuestInvoiceForm, ClientInvoiceForm,ItemFormSet
+from  .forms import GuestInvoiceForm, ClientInvoiceForm,ItemFormSet,EditInvoiceForm
 from django.conf import settings
 from django.http import HttpResponse
 from django.template.loader import render_to_string
@@ -15,6 +15,8 @@ from .forms import GuestInvoiceForm, ItemFormSet,CreateClientForm
 from django.contrib.admin.views.decorators import staff_member_required
 from pathlib import Path
 import platform
+from django.db import transaction
+from django.db.models import Prefetch
 
 @login_required
 def invoice_list(request):
@@ -178,6 +180,58 @@ def client_invoice_create(request):
     })
 
 
+
+@login_required
+def editupdate_invoice(request, pk):
+    # Bind the form to the existing invoice instance
+    invoice = get_object_or_404(Invoice, pk=pk)
+    ItemFormSet.extra = 0
+    if request.method == 'POST':
+        # Bind the form and items
+        form = EditInvoiceForm(request.POST or None,instance=invoice)
+        formset = ItemFormSet(request.POST or None, instance=invoice)
+        # Debugging: show why forms might be invalid
+        print("Update Form is valid?", form.is_valid())
+        print("Update Form errors:", form.errors)
+        print("Update Formset is valid?", formset.is_valid())
+        print("Update Formset errors:", formset.errors)
+
+        if form.is_valid() and formset.is_valid():
+            try:
+                with transaction.atomic():
+                    invoice = form.save(commit=False)
+                    invoice.created_by = None  # guest invoice, no user
+                    invoice.save()  # invoice_no assigned and invoice saved
+                    formset.save()
+                    # if request.headers.get('HX-Request'):
+                    #     # Redirect to the detail page, but tell HTMX to only pick the content
+                    #     response = redirect('invoice_detail', pk=invoice.pk)
+                    #     # We can use a custom header to tell the frontend to stay in the dashboard
+                    #     return response
+                    for obj in formset.deleted_objects:
+                                obj.is_active = False
+                                obj.save()
+                    # 3. Save new and updated items
+                    # We use commit=False so we don't accidentally re-activate soft-deleted items
+                    items = formset.save(commit=False)
+                    for item in items:
+                        item.is_active = True # Ensure updated/new items are active
+                        item.save()
+        
+                    return redirect('invoice_detail', pk=invoice.id)
+            except Exception as e:
+                # If anything inside the 'with' block fails, the DB rolls back
+                form.add_error(None, f"An error occurred: {e}")
+    else:
+        form = EditInvoiceForm(instance=invoice)
+        formset = ItemFormSet(instance=invoice)
+    return render(request, 'invoices/edit_invoice.html', {
+        'form': form,
+        'formset': formset,
+        'invoice':invoice
+    })
+
+
 @login_required
 def invoice_detail(request, pk):
     invoice = get_object_or_404(Invoice, pk=pk)
@@ -187,7 +241,8 @@ def invoice_detail(request, pk):
 
 @login_required
 def invoice_pdf(request, pk):
-    invoice = get_object_or_404(Invoice, pk=pk)
+    invoice = get_object_or_404(Invoice.objects.prefetch_related(
+        Prefetch('items',queryset=Item.objects.filter(is_active=True), to_attr='active_items')), pk=pk)
     logo_path = os.path.join(settings.MEDIA_ROOT, 'defaultlogo.png')
     if not os.path.exists(logo_path):
         print(f"DEBUG: File not found at {logo_path}")
