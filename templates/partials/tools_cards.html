@@ -1,0 +1,136 @@
+    <!-- Add this at the top to load the icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<!-- Main Tools Gallery Section -->
+<section class="container py-5" style="background-color: #f8fafc;">
+    
+    <!-- Section Header -->
+    <div class="row mb-5 text-center">
+        <div class="col-lg-8 mx-auto">
+            <h2 class="display-6 fw-bold text-dark">Our Digital <span class="text-primary">Toolbox</span></h2>
+            <p class="text-secondary lead">Free, fast, and secure tools for students and professionals.</p>
+            <div style="height: 4px; width: 60px; background-color: #0d6efd; margin: 20px auto;"></div>
+        </div>
+    </div>
+
+    <!-- FIRST ROW: TOOLS REDIRECT -->
+    <div class="row g-4 text-center text-md-start">
+        <!-- Tool 1: Active -->
+        <div class="col-md-4">
+            <div class="border benefit-card p-4 h-100 shadow-sm border-0 position-relative" style="background: #fff; border-radius: 12px; transition: 0.3s;" onmouseover="this.style.backgroundColor='#f8f9fa'" onmouseout="this.style.backgroundColor='#fff'">
+                <div class="mb-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; border-radius: 10px; background-color: #0d6efd; color: #fff;">
+                    <i class="bi bi-image fs-4"></i>
+                </div>
+                <h5 class="fw-bold">Image Resizer</h5>
+                <p class="text-muted small mb-3">Adjust photos to exact CM and KB requirements instantly.</p>
+                <a href="{% url 'toolszest:image_resizer' %}" class="stretched-link text-decoration-none fw-bold text-primary small">
+                    Open Tool <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Tool 2: Upcoming -->
+        <div class="col-md-4">
+            <div class="benefit-card p-4 h-100 shadow-sm border-0 position-relative" style="background: #fff; border-radius: 12px; transition: 0.3s;">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; border-radius: 10px; background-color: #198754; color: #fff;">
+                        <i class="bi bi-pen fs-4"></i>
+                    </div>
+                    <span class="badge rounded-pill" style="background-color: #e6fcf5; color: #198754; border: 1px solid #198754; font-size: 0.7rem;">UPCOMING</span>
+                </div>
+                <h5 class="fw-bold">Signature Adjuster</h5>
+                <p class="text-muted small mb-3">Optimize signature scans for ultra-fast portal uploading.</p>
+                <span class="text-muted small fw-bold"><i class="bi bi-clock-history me-1"></i>Coming Soon</span>
+            </div>
+        </div>
+
+        <!-- Tool 3: Upcoming -->
+        <div class="col-md-4">
+            <div class="benefit-card p-4 h-100 shadow-sm border-0 position-relative" style="background: #fff; border-radius: 12px; transition: 0.3s;">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; border-radius: 10px; background-color: #6f42c1; color: #fff;">
+                        <i class="bi bi-file-earmark-pdf fs-4"></i>
+                    </div>
+                    <span class="badge rounded-pill" style="background-color: #f3f0ff; color: #6f42c1; border: 1px solid #6f42c1; font-size: 0.7rem;">UPCOMING</span>
+                </div>
+                <h5 class="fw-bold">DPI Converter</h5>
+                <p class="text-muted small mb-3">Convert images to 300 DPI for high-quality document prints.</p>
+                <span class="text-muted small fw-bold"><i class="bi bi-clock-history me-1"></i>Coming Soon</span>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Features & Tools Gallery Section -->
+<section class="container py-5">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold">Explore Our Utilities</h2>
+        <p class="text-secondary">Professional tools designed for students and digital creators.</p>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+        <!-- Benefit 1: Accuracy -->
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm p-4 text-center">
+                <div class="mb-3 text-primary">
+                    <i class="bi bi-bullseye fs-1"></i>
+                </div>
+                <h5 class="fw-bold">100% Accuracy</h5>
+                <p class="text-muted small">Our algorithms ensure that every centimeter and kilobyte matches your specific requirements perfectly.</p>
+            </div>
+        </div>
+
+        <!-- MIDDLE SECTION: TOOL REDIRECT -->
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-lg p-4 text-center bg-primary text-white">
+                <div class="mb-3">
+                    <i class="bi bi-aspect-ratio-fill fs-1"></i>
+                </div>
+                <h5 class="fw-bold">Image Resizer Tool</h5>
+                <p class="small opacity-75">Adjust dimensions, compress file size, and maintain high quality without watermarks.</p>
+                <div class="mt-auto">
+                    <!-- Update the href with your actual Django URL name or path -->
+                    <a href="{% url 'toolszest:image_resizer' %}" class="btn btn-light fw-bold px-4 rounded-pill">
+                        Open Tool <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Benefit 2: Privacy -->
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm p-4 text-center">
+                <div class="mb-3 text-success">
+                    <i class="bi bi-incognito fs-1"></i>
+                </div>
+                <h5 class="fw-bold">Privacy First</h5>
+                <p class="text-muted small">We value your data. All processing happens in your browser—your photos are never uploaded to our servers.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Extra Tools Text Info -->
+    <div class="row mt-5">
+        <div class="col-12 text-center">
+            <div class="p-4 bg-white rounded-4 border border-light shadow-sm">
+                <h4 class="fw-bold mb-3">One-Stop Solution for Digital Forms</h4>
+                <p class="text-secondary mx-auto" style="max-width: 700px;">
+                    Whether you are preparing for a government exam or updating your professional profile, our 
+                    <strong>Digital Toolbox</strong> provides instant solutions for image manipulation, 
+                    document formatting, and signature optimization—all for free.
+                </p>
+            </div>
+        </div>
+    </div>
+
+     <!-- SEO Information Banner -->
+    <div class="row mt-5">
+        <div class="col-12 text-center">
+            <div class="p-4 rounded-4" style="background-color: #ffffff; border: 1px solid #e2e8f0;">
+                <p class="mb-0 text-secondary">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Looking for a specific format? All our tools are updated regularly to meet the latest 
+                    <strong>Recruitment Board</strong> and <strong>Government Portal</strong> standards.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>

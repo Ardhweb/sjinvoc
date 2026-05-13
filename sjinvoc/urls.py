@@ -24,6 +24,7 @@ urlpatterns = [
     path('internal-admin/control/', admin.site.urls),
     path('invoices/' ,include("invoices.urls")),
     path('accounts/' ,include("accounts.urls")),
+    path('tools/' ,include("toolszest.urls")),
     path('', TemplateView.as_view(template_name="index.html"), name='home'),
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)#For Media Manging Step4
 

@@ -1,0 +1,240 @@
+{% extends 'invoices/base.html' %}
+{% block title %} Professional Image Resizer {% endblock title %}
+
+{% block content %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+<style>
+    /* Professional Styling */
+    .hero-bg { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: white; padding: 60px 0; }
+    .badge-no-watermark { background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+    
+    .tool-wrapper { margin-top: -50px; position: relative; z-index: 10; }
+    .main-tool-card { border: none; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2); background: white; }
+    
+    .preview-box { border: 2px dashed #e2e8f0; padding: 15px; text-align: center; border-radius: 12px; background: #f8fafc; min-height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+    .preview-box img { max-width: 100%; max-height: 250px; display: none; border-radius: 8px; margin-top: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    
+    .status-tag { font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+    .benefit-card { border: none; background: white; border-radius: 12px; transition: transform 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .benefit-card:hover { transform: translateY(-5px); }
+    
+    .icon-circle { height: 48px; width: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 15px; }
+    label { font-weight: 600; margin-bottom: 5px; color: #334155; }
+</style>
+
+<!-- 1. HERO SECTION -->
+<header class="hero-bg text-center">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <span class="badge badge-no-watermark px-3 py-2 rounded-pill mb-3">
+                    <i class="bi bi-patch-check-fill me-1"></i> 100% Free • No Watermarks
+                </span>
+                <h1 class="display-5 fw-bold mb-3">Online Image Adjuster & Resizer</h1>
+                <p class="lead opacity-75">Adjust photos and signatures to exact CM and KB requirements for online application forms instantly.</p>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- 2. MAIN TOOL SECTION -->
+<main class="container tool-wrapper mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-11">
+            <div class="card main-tool-card">
+                <div class="card-body p-4 p-md-5">
+                    <div class="row g-4">
+                        
+                        <!-- Left Column: Inputs -->
+                        <div class="col-lg-5">
+                            <h4 class="mb-4 fw-bold text-primary"><i class="bi bi-sliders me-2"></i>Control Panel</h4>
+                            
+                            <label>1. Select Image</label>
+                            <input type="file" id="imageInput" class="form-control mb-4" accept="image/*">
+
+                            <label>Dimensions (cm)</label>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <div class="input-group">
+                                        <span class="input-group-text">W</span>
+                                        <input type="number" id="widthCm" class="form-control" value="3.5" step="0.1">
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="input-group">
+                                        <span class="input-group-text">H</span>
+                                        <input type="number" id="heightCm" class="form-control" value="4.5" step="0.1">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <label>Target Size (KB Range)</label>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <input type="number" id="minSize" class="form-control" value="20" placeholder="Min">
+                                </div>
+                                <div class="col-6">
+                                    <input type="number" id="maxSize" class="form-control" value="50" placeholder="Max">
+                                </div>
+                            </div>
+
+                            <label>DPI</label>
+                            <input type="number" id="dpi" class="form-control mb-4" value="300">
+
+                            <button id="resizeBtn" class="btn btn-success btn-lg w-100 fw-bold shadow-sm">
+                                <i class="bi bi-gear-wide-connected me-2"></i> Apply & Preview
+                            </button>
+                            
+                            <button id="downloadBtn" class="btn btn-primary btn-lg w-100 fw-bold shadow-sm mt-3" style="display: none;">
+                                <i class="bi bi-cloud-download me-2"></i> Download Result
+                            </button>
+                        </div>
+
+                        <!-- Right Column: Previews -->
+                        <div class="col-lg-7">
+                            <h4 class="mb-4 fw-bold text-secondary text-center text-lg-start"><i class="bi bi-eye me-2"></i>Live Previews</h4>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="preview-box">
+                                        <span class="status-tag">Original Photo</span>
+                                        <span id="origPlaceholder" class="text-muted small">No image uploaded</span>
+                                        <img id="originalPreview">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="preview-box">
+                                        <span class="status-tag">Processed Result</span>
+                                        <span id="procPlaceholder" class="text-muted small">Apply changes to see</span>
+                                        <img id="processedPreview">
+                                        <div id="fileInfo" class="mt-2 text-success fw-bold small"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- 3. BENEFITS SECTION -->
+<section class="container py-4 mb-5">
+    <div class="row g-4 text-center text-md-start">
+        <div class="col-md-4">
+            <div class="benefit-card p-4 h-100 shadow-sm">
+                <div class="icon-circle bg-primary-subtle text-primary">
+                    <i class="bi bi-shield-check"></i>
+                </div>
+                <h5 class="fw-bold">Private & Secure</h5>
+                <p class="text-muted small mb-0">Images are processed locally in your browser. Your data never touches our servers.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="benefit-card p-4 h-100 shadow-sm">
+                <div class="icon-circle bg-success-subtle text-success">
+                    <i class="bi bi-aspect-ratio"></i>
+                </div>
+                <h5 class="fw-bold">Precise Scaling</h5>
+                <p class="text-muted small mb-0">Get exact dimensions in CM required for professional and government application forms.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="benefit-card p-4 h-100 shadow-sm">
+                <div class="icon-circle bg-warning-subtle text-warning">
+                    <i class="bi bi-droplet-slash"></i>
+                </div>
+                <h5 class="fw-bold">No Watermarks</h5>
+                <p class="text-muted small mb-0">High-quality output without any branding, ready for immediate upload to any portal.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<canvas id="canvas" style="display:none;"></canvas>
+
+<script>
+    const imageInput = document.getElementById('imageInput');
+    const originalPreview = document.getElementById('originalPreview');
+    const processedPreview = document.getElementById('processedPreview');
+    const downloadBtn = document.getElementById('downloadBtn');
+    let finalBlob = null;
+
+    // Show original immediately
+    imageInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                originalPreview.src = e.target.result;
+                originalPreview.style.display = 'block';
+                document.getElementById('origPlaceholder').style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    document.getElementById('resizeBtn').addEventListener('click', function() {
+        if (!imageInput.files[0]) return alert('Please select an image first!');
+
+        const widthCm = parseFloat(document.getElementById('widthCm').value);
+        const heightCm = parseFloat(document.getElementById('heightCm').value);
+        const minSize = parseFloat(document.getElementById('minSize').value);
+        const maxSize = parseFloat(document.getElementById('maxSize').value);
+        const dpi = parseInt(document.getElementById('dpi').value);
+
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.getElementById('canvas');
+                const ctx = canvas.getContext('2d');
+                let baseWidthPx = Math.round((widthCm / 2.54) * dpi);
+                let baseHeightPx = Math.round((heightCm / 2.54) * dpi);
+                
+                let quality = 0.90, scaleModifier = 1.0, attempts = 0;
+
+                function iterate() {
+                    attempts++;
+                    canvas.width = Math.round(baseWidthPx * scaleModifier);
+                    canvas.height = Math.round(baseHeightPx * scaleModifier);
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                    canvas.toBlob(function(blob) {
+                        const sizeKB = blob.size / 1024;
+                        if (attempts < 30 && (sizeKB < minSize || sizeKB > maxSize)) {
+                            if (sizeKB < minSize) { 
+                                quality < 0.98 ? quality += 0.03 : scaleModifier += 0.05; 
+                            } else { 
+                                quality > 0.1 ? quality -= 0.05 : scaleModifier -= 0.05; 
+                            }
+                            iterate();
+                        } else {
+                            finalBlob = blob;
+                            processedPreview.src = URL.createObjectURL(blob);
+                            processedPreview.style.display = 'block';
+                            document.getElementById('procPlaceholder').style.display = 'none';
+                            document.getElementById('fileInfo').innerText = `Final Size: ${sizeKB.toFixed(2)} KB`;
+                            downloadBtn.style.display = 'block';
+                        }
+                    }, 'image/jpeg', quality);
+                }
+                iterate();
+            };
+            img.src = event.target.result;
+        };
+        reader.readAsDataURL(imageInput.files[0]);
+    });
+
+    downloadBtn.addEventListener('click', () => {
+        if (!finalBlob) return;
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(finalBlob);
+        link.download = "resized_image.jpg";
+        link.click();
+    });
+</script>
+{% endblock content %}
