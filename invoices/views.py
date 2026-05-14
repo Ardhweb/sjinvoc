@@ -181,60 +181,132 @@ def client_invoice_create(request):
 
 
 
+# @login_required
+# def editupdate_invoice(request, pk):
+#     # Bind the form to the existing invoice instance
+#     invoice = get_object_or_404(Invoice.objects.prefetch_related(
+#     Prefetch('items',queryset=Item.objects.filter(is_active=True), to_attr='active_items')), pk=pk)
+#     ItemFormSet.extra = 0
+#     if request.method == 'POST':
+#         # Bind the form and items
+#         form = EditInvoiceForm(request.POST or None,instance=invoice)
+#         formset = ItemFormSet(request.POST or None, instance=invoice,)
+#         # Debugging: show why forms might be invalid
+#         print("Update Form is valid?", form.is_valid())
+#         print("Update Form errors:", form.errors)
+#         print("Update Formset is valid?", formset.is_valid())
+#         print("Update Formset errors:", formset.errors)
+
+#         if form.is_valid() and formset.is_valid():
+#             try:
+#                 with transaction.atomic():
+#                     invoice = form.save(commit=False)
+#                     items = formset.save(commit=False)
+#                     # if request.headers.get('HX-Request'):
+#                     #     # Redirect to the detail page, but tell HTMX to only pick the content
+#                     #     response = redirect('invoice_detail', pk=invoice.pk)
+#                     #     # We can use a custom header to tell the frontend to stay in the dashboard
+#                     #     return response
+#                     for obj in items.deleted_objects:
+#                                 obj.is_active = False
+#                                 obj.save()
+#                     # 3. Save new and updated items
+#                     # We use commit=False so we don't accidentally re-activate soft-deleted items
+                    
+#                     grand_total = 0
+#                     for item in items:
+#                         item.is_active = True # Ensure updated/new items are active
+#                         item_total = item.total
+#                         grand_total += item_total
+#                         item.save()
+#                     print(grand_total)   
+#                     invoice.total = grand_total
+#                     invoice.save()
+        
+#                     return redirect('invoice_detail', pk=invoice.id)
+#             except Exception as e:
+#                 # If anything inside the 'with' block fails, the DB rolls back
+#                 form.add_error(None, f"An error occurred: {e}")
+#     else:
+#         form = EditInvoiceForm(instance=invoice)
+#         formset = ItemFormSet(instance=invoice,queryset=Item.objects.filter(invoice=invoice, is_active=True))
+#     return render(request, 'invoices/edit_invoice.html', {
+#         'form': form,
+#         'formset': formset,
+#         'invoice':invoice
+#     })
+
+
+
 @login_required
 def editupdate_invoice(request, pk):
-    # Bind the form to the existing invoice instance
-    invoice = get_object_or_404(Invoice, pk=pk)
+    invoice = get_object_or_404(
+        Invoice.objects.prefetch_related(
+            Prefetch('items', queryset=Item.objects.filter(is_active=True), to_attr='active_items')
+        ),
+        pk=pk
+    )
+
     ItemFormSet.extra = 0
+    active_qs = Item.objects.filter(invoice=invoice, is_active=True)
+
     if request.method == 'POST':
-        # Bind the form and items
-        form = EditInvoiceForm(request.POST or None,instance=invoice)
-        formset = ItemFormSet(request.POST or None, instance=invoice)
-        # Debugging: show why forms might be invalid
-        print("Update Form is valid?", form.is_valid())
-        print("Update Form errors:", form.errors)
-        print("Update Formset is valid?", formset.is_valid())
-        print("Update Formset errors:", formset.errors)
+        form = EditInvoiceForm(request.POST, instance=invoice)
+        formset = ItemFormSet(request.POST, instance=invoice, queryset=active_qs)
 
         if form.is_valid() and formset.is_valid():
             try:
                 with transaction.atomic():
                     invoice = form.save(commit=False)
-                    invoice.created_by = None  # guest invoice, no user
-                    invoice.save()  # invoice_no assigned and invoice saved
-                    formset.save()
-                    # if request.headers.get('HX-Request'):
-                    #     # Redirect to the detail page, but tell HTMX to only pick the content
-                    #     response = redirect('invoice_detail', pk=invoice.pk)
-                    #     # We can use a custom header to tell the frontend to stay in the dashboard
-                    #     return response
-                    for obj in formset.deleted_objects:
-                                obj.is_active = False
-                                obj.save()
-                    # 3. Save new and updated items
-                    # We use commit=False so we don't accidentally re-activate soft-deleted items
-                    items = formset.save(commit=False)
-                    for item in items:
-                        item.is_active = True # Ensure updated/new items are active
+
+                    # 1️⃣ Handle items: update active, deactivate deleted
+                    grand_total = 0
+                    for item_form in formset:
+                        item = item_form.save(commit=False)
+
+                        if item_form.cleaned_data.get('DELETE'):  # Mark as inactive if user deleted
+                            item.is_active = False
+                            item.save()
+                            continue  # Skip adding to total
+
+                        # Otherwise, active item: save updates
+                        item.is_active = True
+                        item.invoice = invoice
                         item.save()
-        
-                    return redirect('invoice_detail', pk=invoice.id)
+
+                        # Add to grand total only active items
+                        grand_total += item.total  # uses your @property total
+
+                    # 2️⃣ Update invoice total
+                    invoice.total = grand_total
+                    invoice.save()
+
+                # Redirect after successful save
+                return redirect('invoice_detail', pk=invoice.id)
+
             except Exception as e:
-                # If anything inside the 'with' block fails, the DB rolls back
-                form.add_error(None, f"An error occurred: {e}")
+                print(f"Transaction Error: {e}")
+                form.add_error(None, f"Database error: {e}")
+
+        else:
+            # Print validation errors for debugging
+            print("Form errors:", form.errors)
+            print("Formset errors:", formset.errors)
+
     else:
         form = EditInvoiceForm(instance=invoice)
-        formset = ItemFormSet(instance=invoice)
+        formset = ItemFormSet(instance=invoice, queryset=active_qs)
+
     return render(request, 'invoices/edit_invoice.html', {
         'form': form,
         'formset': formset,
-        'invoice':invoice
+        'invoice': invoice
     })
-
 
 @login_required
 def invoice_detail(request, pk):
-    invoice = get_object_or_404(Invoice, pk=pk)
+    invoice = get_object_or_404(Invoice.objects.prefetch_related(
+    Prefetch('items',queryset=Item.objects.filter(is_active=True), to_attr='active_items')), pk=pk)
     if not (invoice.created_by == request.user or request.user.is_staff or request.user.is_superuser):
         return HttpResponse("You are not authorized to view this invoice.", status=403)
     return render(request, 'invoices/invoice_detail.html', {'invoice': invoice})
