@@ -15,13 +15,35 @@ class Client(models.Model):
     place = models.CharField(max_length=20, blank=True, null=True)
     is_active = models.BooleanField(default=True)
 
+
     def __str__(self):
         return self.name
 
+class Firm(models.Model):
+    name = models.CharField(max_length=200)
+    email = models.EmailField(blank=True)
+    phone = models.CharField(max_length=20, blank=True)
+    place = models.CharField(max_length=20, blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+
+    def __str__(self):
+        return self.name
 
 class InvoiceLabel(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     invoice_label_title = models.CharField(max_length=200)
+    is_active = models.BooleanField(default=True)
+
+class InvoiceLabel(models.Model):
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    invoice_label_title = models.CharField(max_length=200)
+    is_active = models.BooleanField(default=True)
+
+class InvoiceTheme(models.Model):
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    theme_name = models.CharField(max_length=200)
+    theme_config = models.JSONField(blank=True,null=True)
     is_active = models.BooleanField(default=True)
 
 class Invoice(models.Model):
@@ -55,7 +77,8 @@ class Invoice(models.Model):
     suffix = models.CharField(max_length=10, blank=True, null=True)
     
     invoice_label =models.ForeignKey(InvoiceLabel, on_delete=models.SET_NULL, null=True, blank=True)
-    
+    organization = models.ForeignKey(Firm, on_delete=models.SET_NULL, null=True, blank=True)
+    theme_style = models.ForeignKey(InvoiceTheme, on_delete=models.SET_NULL, null=True, blank=True)
     context_title = models.CharField(
         max_length=255, 
         blank=True, 

@@ -34,6 +34,7 @@
             <td>
                 <a class="btn btn-sm btn-info" href="{% url 'invoice_detail' invoice.id %}">View</a>
                 <a class="btn btn-sm btn-success" href="{% url 'invoice_pdf' invoice.id %}">PDF</a>
+                <a class="btn btn-sm btn-success" href="{% url 'test_pdf' invoice.special_uid %}">test theme </a>
                  <a class="btn btn-sm btn-danger" href="{% url 'edit_invoice' invoice.id %}">Edit</a>
             </td>
         </tr>

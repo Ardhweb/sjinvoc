@@ -1,9 +1,238 @@
-<html>
-<body>
- <h1>My Shop</h1>
- <p>
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice {{ invoice.id }}</title>
+    <style>
+        /* --- 1. THE INJECTION BRIDGE --- */
+        :root {
+            /* Colors */
+            --primary: {{ theme.styles.colors.primary|default:"#000000" }};
+            --text-main: {{ theme.styles.colors.text_main|default:"#1e293b" }};
+            --bg-soft: {{ theme.styles.colors.bg_soft|default:"#f8fafc" }};
+            --border-color: {{ theme.styles.colors.border|default:"#e2e8f0" }};
+            
+            /* Typography */
+            --font-family: {{ theme.styles.fonts.family|default:"Arial, sans-serif" }};
+            --font-main: {{ theme.styles.fonts.size_main|default:"10pt" }};
+            --font-header: {{ theme.styles.fonts.size_header|default:"18pt" }};
+            
+            /* Geometry */
+            --wrapper-padding: {{ theme.styles.geometry.padding_wrapper|default:"40px" }};
+            --radius: {{ theme.styles.geometry.border_radius|default:"0px" }};
+            --gap: {{ theme.styles.geometry.table_gap|default:"15rem" }};
+        }
 
- </p>
- <h3>Bill to</h3>
- </body>
- </html>
+        /* --- 2. GLOBAL RESET & BASE --- */
+        @page {
+            size: A4;
+            margin: 0;
+        }
+
+        body {
+            font-family: var(--font-family);
+            color: var(--text-main);
+            font-size: var(--font-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.4;
+        }
+
+        .invoice-wrapper {
+            padding: var(--wrapper-padding);
+            min-height: 297mm; /* Ensure full page height for borders */
+            box-sizing: border-box;
+        }
+
+        /* --- 3. DYNAMIC HEADER --- */
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 40px;
+        }
+
+        .logo-box h1 {
+            margin: 5px 0 0 0;
+            font-size: var(--font-header);
+            color: var(--primary);
+            text-transform: uppercase;
+        }
+
+        .logo-box img {
+            max-height: 60px;
+            width: auto;
+        }
+
+        .meta-info {
+            text-align: right;
+        }
+
+        .meta-info h2 {
+            margin: 0;
+            color: var(--primary);
+            font-size: 22pt;
+        }
+
+        /* --- 4. THE MASTER TABLE --- */
+        .main-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .main-table th {
+            padding: 12px 10px;
+            text-transform: {% if theme.table_structure.header_caps %}uppercase{% else %}none{% endif %};
+            background: {% if theme.table_structure.header_caps %}var(--primary){% else %}transparent{% endif %};
+            color: {% if theme.table_structure.header_caps %}#ffffff{% else %}var(--text-main){% endif %};
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .main-table td {
+            padding: 10px;
+            vertical-align: top;
+            border-bottom: 1px solid var(--border-color);
+            /* Grid line logic from JSON */
+            border-right: {% if theme.table_structure.show_grid %}1px solid var(--border-color){% else %}none{% endif %};
+        }
+
+        .main-table td:last-child {
+            border-right: none;
+        }
+
+        /* --- 5. THE TOTALS SECTION --- */
+        .footer-summary {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+
+        .total-box {
+            width: 280px;
+            background: var(--bg-soft);
+            padding: 20px;
+            border-radius: var(--radius);
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+        }
+
+        .grand-total {
+            border-top: 2px solid var(--primary);
+            margin-top: 10px;
+            padding-top: 10px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="invoice-wrapper">
+
+    <!-- Header Section -->
+    <div class="header-container">
+        <div class="logo-box">
+            {% if invoice.image %}
+                <img src="{{ invoice.image.url }}" alt="Business Logo">
+            {% endif %}
+            
+            {% if invoice.organization %}
+            <h1>{{invoice.organization.name}}</h1>
+            {% else %}
+            <h1>SJ Hydraulics M.P.</h1>
+            {% endif %}
+        </div>
+        
+        <div class="meta-info">
+            <h2>{{ theme.labels.invoice_prefix|default:"INV" }}{{ invoice.id }}</h2>
+            <p><strong>Due Date:</strong> {{ invoice.date|date:"d M, Y" }}</p>
+            {% if invoice.due_date %}
+                <p><strong>Due Date:</strong> {{ invoice.due_date|date:"d M, Y" }}</p>
+            {% endif %}
+
+            <p>
+    <strong>Status:</strong> 
+    {% if invoice.status == "alredy_paid" %}
+        <span style="color: #16a34a; font-weight: bold;">Paid</span>
+    {% else %}
+        <span style="color: #dc2626; font-weight: bold;">Pending</span>
+    {% endif %}
+</p>
+        </div>
+    </div>
+
+    <!-- Client Details -->
+    <div style="margin-bottom: 30px;">
+        <p style="margin: 0; color: #64748b; font-weight: bold; text-transform: uppercase; font-size: 8pt;">Billed To:</p>
+        <h3 style="margin: 5px 0 0 0;">
+            {% if invoice.client %}{{ invoice.client.name }}{% else %}{{ invoice.guest_client_name }}{% endif %}
+        </h3>
+    </div>
+
+    <!-- The Universal Table -->
+    <table class="main-table">
+        <thead>
+            <tr>
+                {% for col in theme.table_structure.columns %}
+                    <th style="width: {{ col.width }}; text-align: {{ col.align }};">
+                        {{ col.label }}
+                    </th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in invoice.active_items %}
+            <tr>
+                {% for col in theme.table_structure.columns %}
+                    <td style="text-align: {{ col.align }};">
+                        <!-- Cell Data Unloading -->
+                        <div class="cell-content">
+                            {% if col.key == 'idx' %}{{ forloop.parentloop.counter }}
+                            {% elif col.key == 'name' %}{{ item.item_name }}
+                            {% elif col.key == 'qty' %}{{ item.quantity }}
+                            {% elif col.key == 'total' %}{{ item.total }}
+                            {% endif %}
+                        </div>
+
+                        <!-- Infused Gap Logic: Only applies to the 'name' column on the last item -->
+                        {% if forloop.parentloop.last and col.key == 'name' %}
+                            <div style="height: var(--gap);"></div>
+                        {% endif %}
+                    </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Grand Total Section -->
+    <div class="footer-summary">
+        <div class="total-box">
+            <div class="total-row">
+                <span>Subtotal:</span>
+                <span>{{ theme.labels.currency|default:"₹" }} {{ invoice.total }}</span>
+            </div>
+            <div class="total-row grand-total">
+                <span>TOTAL:</span>
+                <span>{{ theme.labels.currency|default:"₹" }} {{ invoice.total }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Optional Footer Msg -->
+    <div style="margin-top: 50px; text-align: center; color: #94a3b8;">
+        <p>{{ theme.labels.footer_msg|default:"Generated electronically." }}</p>
+    </div>
+
+</div>
+
+</body>
+</html>

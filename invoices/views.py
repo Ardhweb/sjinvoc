@@ -1,7 +1,7 @@
 from django.shortcuts import render,redirect,get_object_or_404
 from django.contrib.auth.decorators import login_required
 # Create your views here.
-from .models import Invoice, Client, Item
+from .models import Invoice, Client, Item,InvoiceTheme
 from  .forms import GuestInvoiceForm, ClientInvoiceForm,ItemFormSet,EditInvoiceForm
 from django.conf import settings
 from django.http import HttpResponse
@@ -17,7 +17,8 @@ from pathlib import Path
 import platform
 from django.db import transaction
 from django.db.models import Prefetch
-
+from weasyprint import HTML 
+from django.template.loader import render_to_string
 @login_required
 def invoice_list(request):
     if request.user.is_staff or request.user.is_superuser:
@@ -181,63 +182,6 @@ def client_invoice_create(request):
 
 
 
-# @login_required
-# def editupdate_invoice(request, pk):
-#     # Bind the form to the existing invoice instance
-#     invoice = get_object_or_404(Invoice.objects.prefetch_related(
-#     Prefetch('items',queryset=Item.objects.filter(is_active=True), to_attr='active_items')), pk=pk)
-#     ItemFormSet.extra = 0
-#     if request.method == 'POST':
-#         # Bind the form and items
-#         form = EditInvoiceForm(request.POST or None,instance=invoice)
-#         formset = ItemFormSet(request.POST or None, instance=invoice,)
-#         # Debugging: show why forms might be invalid
-#         print("Update Form is valid?", form.is_valid())
-#         print("Update Form errors:", form.errors)
-#         print("Update Formset is valid?", formset.is_valid())
-#         print("Update Formset errors:", formset.errors)
-
-#         if form.is_valid() and formset.is_valid():
-#             try:
-#                 with transaction.atomic():
-#                     invoice = form.save(commit=False)
-#                     items = formset.save(commit=False)
-#                     # if request.headers.get('HX-Request'):
-#                     #     # Redirect to the detail page, but tell HTMX to only pick the content
-#                     #     response = redirect('invoice_detail', pk=invoice.pk)
-#                     #     # We can use a custom header to tell the frontend to stay in the dashboard
-#                     #     return response
-#                     for obj in items.deleted_objects:
-#                                 obj.is_active = False
-#                                 obj.save()
-#                     # 3. Save new and updated items
-#                     # We use commit=False so we don't accidentally re-activate soft-deleted items
-                    
-#                     grand_total = 0
-#                     for item in items:
-#                         item.is_active = True # Ensure updated/new items are active
-#                         item_total = item.total
-#                         grand_total += item_total
-#                         item.save()
-#                     print(grand_total)   
-#                     invoice.total = grand_total
-#                     invoice.save()
-        
-#                     return redirect('invoice_detail', pk=invoice.id)
-#             except Exception as e:
-#                 # If anything inside the 'with' block fails, the DB rolls back
-#                 form.add_error(None, f"An error occurred: {e}")
-#     else:
-#         form = EditInvoiceForm(instance=invoice)
-#         formset = ItemFormSet(instance=invoice,queryset=Item.objects.filter(invoice=invoice, is_active=True))
-#     return render(request, 'invoices/edit_invoice.html', {
-#         'form': form,
-#         'formset': formset,
-#         'invoice':invoice
-#     })
-
-
-
 @login_required
 def editupdate_invoice(request, pk):
     invoice = get_object_or_404(
@@ -383,3 +327,36 @@ def dashboard(request):
     pending_invo_count = Invoice.objects.filter(status__in=['payment_due', 'partially_paid', 'due_paid']).count()
     print(pending_invo_count)
     return render(request, 'invoices/dashboard.html', {'invoice_count':total_invoice,'pending_count':pending_invo_count})
+
+
+
+
+def test_pdf(request, special_id):
+    invoice = get_object_or_404(Invoice.objects.prefetch_related(
+        Prefetch('items',queryset=Item.objects.filter(is_active=True), to_attr='active_items')), special_uid=special_id)
+    theme_obj = InvoiceTheme.objects.filter(is_active=True, pk=2).first()
+    if not theme_obj:
+        # Fallback if no theme exists in DB yet
+        theme_config = {
+            "styles": {"primary_color": "#000000", "font_family": "Arial"},
+            "layout": {"total_box_height": "20rem"},
+            "labels": {"currency_symbol": "/-Rs"}
+        }
+    else:
+        theme_config = theme_obj.theme_config
+
+    # 3. "Unload" into Context
+    # We pass 'theme' so the template can access theme.styles.primary_color etc.
+    context = {
+        'invoice': invoice, 
+        'theme': theme_config  
+    }
+    html_string = render_to_string('invoices/pdf.html', context)
+    
+    # 4. Generate PDF
+    html = HTML(string=html_string, base_url=request.build_absolute_uri('/'))
+    pdf = html.write_pdf()
+
+    response = HttpResponse(pdf, content_type='application/pdf')
+    response['Content-Disposition'] = f'filename=invoice_{invoice.id}.pdf'
+    return response

@@ -14,4 +14,6 @@ urlpatterns = [
     path('<uuid:special_id>/pdf/', views.guest_invoice_pdf, name='guest_invoice_pdf'),
     path('newclient/', views.create_new_client, name='create_new_client'),
     path('dashboard', views.dashboard, name='dashboard'),
+
+    path('<uuid:special_id>/test-pdf/', views.test_pdf, name='test_pdf'),
 ]
