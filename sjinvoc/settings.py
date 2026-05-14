@@ -160,3 +160,12 @@ else:
 #LOGIN_REDIRECT_URL = 'dashboard'  
 LOGOUT_REDIRECT_URL = 'home'  
 LOGIN_URL = 'accounts:login'
+
+# Set session cookie to expire after 24 hours (in seconds)
+SESSION_COOKIE_AGE = 86400
+
+# Prevent the session from renewing automatically on every single request
+SESSION_SAVE_EVERY_REQUEST = False
+
+# Optional: Expire the session if they close the browser before the day ends
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
