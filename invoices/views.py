@@ -290,7 +290,8 @@ def guest_invoice_detail(request, special_id):
 
 
 def guest_invoice_pdf(request, special_id):
-    invoice = get_object_or_404(Invoice, special_uid=special_id)
+    invoice = get_object_or_404(Invoice.objects.prefetch_related(
+        Prefetch('items',queryset=Item.objects.filter(is_active=True), to_attr='active_items')), special_uid=special_id)
     logo_path = os.path.join(settings.MEDIA_ROOT, 'defaultlogo.png')
     if not os.path.exists(logo_path):
         print(f"DEBUG: File not found at {logo_path}")
