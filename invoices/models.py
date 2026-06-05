@@ -3,7 +3,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from datetime import date
 import uuid 
-
+from django.core.validators import MinValueValidator
 def current_year():
     from datetime import date
     return date.today().year
@@ -48,11 +48,10 @@ class InvoiceTheme(models.Model):
 
 class Invoice(models.Model):
     STATUS_CHOICES = [
-        ('paid_upfront', 'Paid Upfront (No Due)'),
-        ('payment_due', 'Payment After Service (Due Date Required)'),
-        ('partially_paid', 'Partially Paid (Due Date Required)'),
-        ('already_paid', 'Already Paid (No Due)'),
-        ('due_paid', 'Previously Due, Now Paid (No Due)'),
+        ('paid', 'Paid'),
+        ('payment_due', 'Payment After Service'),
+        ('partially_paid', 'Partially Paid'),
+        ('due_paid', 'Previously Due, Now Paid'),
     ]
     special_uid = models.UUIDField(
         default=uuid.uuid4, 
@@ -118,7 +117,7 @@ class Invoice(models.Model):
                 self.invoice_no = 1  # first invoice of the year
 
         # Handle due_date logic
-        if self.status in ['paid_upfront', 'already_paid', 'due_paid']:
+        if self.status in ['paid',  'due_paid']:
             self.due_date = None
         super().save(*args, **kwargs)
 
@@ -135,10 +134,10 @@ class Invoice(models.Model):
         return str(self.invoice_no)
 
 
-    def __str__(self):
-        if self.client:
-            return f"Invoice {self.id} for {self.client.name}"
-        return f"Invoice {self.id} for {self.guest_client_name}"
+    # def __str__(self):
+    #     if self.client:
+    #         return f"Invoice {self.id} for {self.client.name}"
+    #     return f"Invoice {self.id} for {self.guest_client_name}"
 
 class Item(models.Model):
     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, related_name='items')
@@ -150,3 +149,56 @@ class Item(models.Model):
     @property
     def total(self):
         return self.quantity * self.price
+
+
+class DiscountCategory(models.Model):
+    """
+    Real table for firms to manage categories (e.g., 'Black Friday').
+    """
+    SYSTEM_TYPE_CHOICES = [
+        ('SEASONAL', 'Seasonal / Festival Campaign'),
+        ('COUPON', 'Promo / Coupon Code'),
+        ('LOYALTY', 'Loyalty / Reward Points'),
+        ('VOLUME', 'Bulk / Volume Discount'),
+        ('CUSTOM', 'Other / Custom Offer'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    firm = models.ForeignKey(Firm, on_delete=models.CASCADE, related_name="discount_categories")
+    name = models.CharField(max_length=50)
+    system_type = models.CharField(
+        max_length=20, 
+        choices=SYSTEM_TYPE_CHOICES, 
+        default='CUSTOM',
+        help_text="Underlying core category behavior"
+    )
+    code = models.CharField(max_length=50, blank=True, null=True, help_text="Coupon code if applicable")
+
+    def __str__(self):
+        return f"{self.name} [{self.get_system_type_display()}] ({self.firm.name})"
+
+
+class Discount(models.Model):
+    """
+    Reusable discount rule configurations created by firm admins.
+    Can be completely hard-deleted later to save space.
+    """
+    DISCOUNT_TYPE_CHOICES = [
+        ('PERCENTAGE', 'Percentage Based (%)'),
+        ('FLAT', 'Flat Amount Deduction ($)'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    category = models.ForeignKey(DiscountCategory, on_delete=models.SET_NULL, null=True, related_name="discounts_category")
+    invoice = models.ForeignKey(Invoice, on_delete=models.SET_NULL, null=True, related_name="discounts_category")
+    
+    name = models.CharField(max_length=100, help_text="e.g., Black Friday 20% Off")
+    applied_code = models.CharField(max_length=50, blank=True, null=True, help_text="Coupon code if applicable")
+    
+    # Crucial: Calculation type is kept right here alongside the math configuration
+    discount_type = models.CharField(max_length=20, choices=DISCOUNT_TYPE_CHOICES, default='PERCENTAGE')
+    value = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0.00)])
+
+
+    def __str__(self):
+        return f"{self.name} ({self.get_discount_type_display()})"

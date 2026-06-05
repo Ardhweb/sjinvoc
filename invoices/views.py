@@ -79,7 +79,7 @@ def guest_invoice_create(request):
             
             # Adjust due date logic based on status
             # Already handled in model.save(), so this is optional
-            if invoice.status in ['paid_upfront', 'already_paid', 'due_paid']:
+            if invoice.status in ['paid',  'due_paid']:
                 invoice.due_date = None
             invoice.save()
 
@@ -157,7 +157,7 @@ def client_invoice_create(request):
             
             # Adjust due date logic based on status
             # Already handled in model.save(), so this is optional
-            if invoice.status in ['paid_upfront', 'already_paid', 'due_paid']:
+            if invoice.status in ['paid', 'due_paid']:
                 invoice.due_date = None
             invoice.save()
 
