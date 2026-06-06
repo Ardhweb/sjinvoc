@@ -1,7 +1,7 @@
 from django.contrib import admin
 import csv
 # Register your models here.
-from .models import Invoice, Item,Client,InvoiceLabel,InvoiceTheme,Firm
+from .models import Invoice, Item,Client,InvoiceLabel,InvoiceTheme,Firm,DiscountCategory
 from django.http import HttpResponse
 
 def export_as_csv(modeladmin, request, queryset):
@@ -34,3 +34,4 @@ admin.site.register(Item,ItemAdmin)
 admin.site.register(Client,ClientAdmin)
 admin.site.register(InvoiceTheme)
 admin.site.register(Firm)
+admin.site.register(DiscountCategory)

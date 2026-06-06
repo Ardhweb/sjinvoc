@@ -173,7 +173,8 @@ class DiscountCategory(models.Model):
         help_text="Underlying core category behavior"
     )
     code = models.CharField(max_length=50, blank=True, null=True, help_text="Coupon code if applicable")
-
+    value = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0.00)])
+    
     def __str__(self):
         return f"{self.name} [{self.get_system_type_display()}] ({self.firm.name})"
 

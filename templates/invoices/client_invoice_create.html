@@ -12,7 +12,7 @@
         <!-- ✅ Required for formset validation -->
         {{ formset.management_form }}
 
-        <div class="">
+       <div class="container-fluid my-3 " style="background-color: #f8f9fa; border-radius: 5px;">
             <div class="row g-3 align-items-end">
                 <!-- Guest Client Name -->
                 <div class="col-auto">
@@ -23,7 +23,7 @@
                 <!-- Invoice Status Dropdown -->
                 <div class="col-auto">
                     <label for="id_status" class="form-label">Invoice Status</label>
-                    <select name="status" id="id_status" class="form-control" style="width: 150px;">
+                    <select name="status" id="id_status" class="form-control form-select" aria-label="Default select example" style="width: 150px;">
                         {% for value, label in form.status.field.choices %}
                         <option value="{{ value }}" {% if form.status.value == value %}selected{% endif %}>
                             {{ label }}
@@ -47,10 +47,15 @@
             </div>
         </div>
 
-        <h4 class="mt-4">Items</h4>
+ <div class="container-fluid my-3 " style="background-color: #f8f9fa; border-radius: 5px;">
+        <!-- Small heading with subtle background -->
+    <h6 class=" p-2" style="background-color: #e9ecef; color: #495057; border-radius: 3px;">
+        Items
+    </h6>
         <table class="table table-striped" id="items-table">
             <thead>
                 <tr>
+                    <th style="width:2.5rem;!important;">No.</th>
                     <th>Description</th>
                     <th style="width: 12rem!important;">Quantity</th>
                     <th style="width: 12rem!important;">Price</th>
@@ -61,6 +66,7 @@
             <tbody>
             {% for form in formset.forms %}
                 <tr>
+                    <td>{{ forloop.counter }}</td>
                     <td>{{ form.item_name }}</td>
                     <td class="w-10">{{ form.quantity }}</td>
                     <td>{{ form.price }}</td>
@@ -76,8 +82,47 @@
             {% endfor %}
             </tbody>
         </table>
+        <div class="row">
+            <div class="col-auto">
+         <button type="button" class="btn btn-dark btn-sm btn-secondary" id="add-item">Add more item</button>
 
-        <button type="button" class="btn btn-dark btn-sm btn-secondary" id="add-item">Add more item</button>
+</div>
+    <div class="col-auto form-check form-switch">
+        <input class="form-check-input" type="checkbox" id="discountSwitch">
+        <label class="form-check-label" for="discountSwitch">
+            Add Overall Discount
+        </label>
+    </div>
+
+   
+
+</div>
+
+        </div>
+
+        <div id="discountSection" class=" d-none container-fluid my-3 " style="background-color: #f8f9fa; border-radius: 5px;">
+    <!-- Small heading with subtle background -->
+    <h6 class="mb-3 p-2" style="background-color: #e9ecef; color: #495057; border-radius: 3px;">
+        Discount Details
+    </h6>
+
+    <!-- Inline form fields -->
+    <div class="row g-2 align-items-center">
+        <div class="col-auto">
+            {{ dis_form.discount_type.label_tag }}
+            {{ dis_form.discount_type }}
+        </div>
+        <div class="col-auto">
+            {{ dis_form.value.label_tag }}
+
+             <div style="display:flex; align-items:center; gap:6px;">
+        {{ dis_form.value }}
+        <span id="discountSymbol"></span>
+    </div>
+        </div>
+    </div>
+</div>
+       
         <h5 class="mt-3">Invoice Total: <span id="invoice-total">0</span></h5>
 
         <!-- Use type="submit" to trigger the dashboard listener -->
@@ -131,6 +176,7 @@
                     let index = parseInt(totalForms.value);
                     let row = table.insertRow();
                     row.innerHTML = `
+                         <td class="row-number">${index + 1}</td>
                         <td><input type="text" name="${formsetPrefix}-${index}-item_name" class="form-control" /></td>
                         <td><input type="number" name="${formsetPrefix}-${index}-quantity" value="1" class="form-control" /></td>
                         <td><input type="number" name="${formsetPrefix}-${index}-price" value="0" class="form-control" step="0.01" /></td>
@@ -154,6 +200,85 @@
 
         // Run once on load
         initInvoicePage();
-    </script>
+
+        document.getElementById('discountSwitch').addEventListener('change', function () {
+    document.getElementById('discountSection').classList.toggle('d-none', !this.checked);
+    
+
+
+
+});
+
+// Grab elements
+const discountSwitch = document.getElementById('discountSwitch');
+const discountTypeEl = document.getElementById('id_discount_type');
+const discountValueEl = document.getElementById('id_value');
+const discountSymbol = document.getElementById('discountSymbol');
+let  final_total = document.getElementById("invoice-total")
+
+
+// Customize the symbol based on type
+function updateDiscountSymbol() {
+    if (!discountSwitch.checked) {
+        discountSymbol.textContent = ''; // Switch OFF → empty
+        return;
+    }
+
+    const type = discountTypeEl.value.toLowerCase();
+
+    if (type === 'percentage') {
+        discountSymbol.textContent = '%';
+        //final_total.textContent = final_total.textContent * discountValueEl.value / 100
+    } else if (type === 'flat') {
+        discountSymbol.textContent = '$'; // Change to your currency symbol
+    } else {
+        discountSymbol.textContent = '';
+    }
+}
+
+// Handle discount logic
+function handleDiscountChange() {
+    if (!discountSwitch.checked) return;
+
+    updateDiscountSymbol(); // Update symbol
+
+    const discountType = discountTypeEl.value;
+    const discountValue = discountValueEl.value.trim();
+  
+    if (discountValue === '') return;
+
+    console.log('Discount Active!');
+    console.log('Type:', discountType);
+    console.log('Value:', discountValue);
+
+    // 👉 Here you can recalc totals or send via AJAX
+
+
+}
+
+// Enable/disable fields based on switch
+discountSwitch.addEventListener('change', function () {
+    const enabled = this.checked;
+    discountTypeEl.disabled = !enabled;
+    discountValueEl.disabled = !enabled;
+
+    updateDiscountSymbol();
+
+    if (enabled) handleDiscountChange();
+});
+
+// Trigger when type or value changes
+discountTypeEl.addEventListener('change', handleDiscountChange);
+discountValueEl.addEventListener('input', handleDiscountChange);
+
+// Initialize
+discountTypeEl.disabled = true;
+discountValueEl.disabled = true;
+updateDiscountSymbol();
+
+
+
+
+</script>
 </div> <!-- 🚀 END content-area -->
 {% endblock %}
