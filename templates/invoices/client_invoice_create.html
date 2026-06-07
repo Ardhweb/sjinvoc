@@ -59,7 +59,7 @@
                     <th>Description</th>
                     <th style="width: 12rem!important;">Quantity</th>
                     <th style="width: 12rem!important;">Price</th>
-                    <th>Total</th>
+                    <th>Subtotal</th>
                     <th style="width: 12rem!important;">Remove</th>
                 </tr>
             </thead>
@@ -130,15 +130,9 @@
     </form>
 
     <script>
-        // Clean initialization function
-        function initInvoicePage() {
-            const statusSelect = document.getElementById('id_status');
-            const dueDiv = document.getElementById('due-date-div');
-            const addItemBtn = document.getElementById('add-item');
-            const formsetPrefix = '{{ formset.prefix }}';
-            let totalForms = document.querySelector(`#id_${formsetPrefix}-TOTAL_FORMS`);
+        
 
-            function updateTotals() {
+function updateTotals() {
                 let total = 0;
                 document.querySelectorAll('#items-table tbody tr').forEach(row => {
                     let qtyInput = row.querySelector('input[name$="quantity"]');
@@ -150,64 +144,29 @@
                     row.querySelector('.item-total').innerText = itemTotal.toFixed(2);
                     total += itemTotal;
                 });
-                const totalDisplay = document.getElementById('invoice-total');
-                if (totalDisplay) totalDisplay.innerText = total.toFixed(2);
-            }
 
-            // Status Toggle
-            if (statusSelect && dueDiv) {
-                const toggle = () => {
-                    const showDue = ['payment_due', 'partially_paid'].includes(statusSelect.value);
-                    dueDiv.style.display = showDue ? 'block' : 'none';
-                };
-                statusSelect.addEventListener('change', toggle);
-                toggle();
-            }
+                // 2. Apply discount math on top of that aggregated total
+    if (discountSwitch.checked) {
+        const discountValue = parseFloat(discountValueEl.value) || 0;
+        const type = discountTypeEl.value.toLowerCase();
 
-            // Input listeners
-            document.querySelectorAll('[name$="quantity"], [name$="price"]').forEach(input => {
-                input.addEventListener('input', updateTotals);
-            });
-
-            // Add Item
-            if (addItemBtn && totalForms) {
-                addItemBtn.onclick = () => {
-                    let table = document.getElementById('items-table').querySelector('tbody');
-                    let index = parseInt(totalForms.value);
-                    let row = table.insertRow();
-                    row.innerHTML = `
-                         <td class="row-number">${index + 1}</td>
-                        <td><input type="text" name="${formsetPrefix}-${index}-item_name" class="form-control" /></td>
-                        <td><input type="number" name="${formsetPrefix}-${index}-quantity" value="1" class="form-control" /></td>
-                        <td><input type="number" name="${formsetPrefix}-${index}-price" value="0" class="form-control" step="0.01" /></td>
-                        <td class="item-total">0</td>
-                        <td><button type="button" class="btn btn-sm btn-danger remove-item">X</button></td>
-                    `;
-                    totalForms.value = index + 1;
-                    row.querySelectorAll('input').forEach(i => i.addEventListener('input', updateTotals));
-                    row.querySelector('.remove-item').onclick = (e) => { e.target.closest('tr').remove(); updateTotals(); };
-                    updateTotals();
-                };
-            }
-
-            // Remove Item
-            document.querySelectorAll('.remove-item').forEach(btn => {
-                btn.onclick = (e) => { e.target.closest('tr').remove(); updateTotals(); };
-            });
-
-            updateTotals();
+        if (type === 'percentage') {
+            total = total - (total * discountValue / 100);
+        } else if (type === 'flat') {
+            total = total - discountValue;
         }
+    }
 
-        // Run once on load
-        initInvoicePage();
+    // Prevent negative invoice totals
+    if (total < 0) total = 0;
 
-        document.getElementById('discountSwitch').addEventListener('change', function () {
-    document.getElementById('discountSection').classList.toggle('d-none', !this.checked);
-    
+    // 3. Render the final total to the DOM
+    const totalDisplay = document.getElementById('invoice-total');
+    if (totalDisplay) totalDisplay.innerText = total.toFixed(2);
+                // const totalDisplay = document.getElementById('invoice-total');
+                // if (totalDisplay) totalDisplay.innerText = total.toFixed(2);
+            }
 
-
-
-});
 
 // Grab elements
 const discountSwitch = document.getElementById('discountSwitch');
@@ -217,31 +176,88 @@ const discountSymbol = document.getElementById('discountSymbol');
 let  final_total = document.getElementById("invoice-total")
 
 
-// Customize the symbol based on type
+
+// Customize the symbol based on type and update the final total
 function updateDiscountSymbol() {
     if (!discountSwitch.checked) {
         discountSymbol.textContent = ''; // Switch OFF → empty
-        return;
-    }
-
-    const type = discountTypeEl.value.toLowerCase();
-
-    if (type === 'percentage') {
-        discountSymbol.textContent = '%';
-        //final_total.textContent = final_total.textContent * discountValueEl.value / 100
-    } else if (type === 'flat') {
-        discountSymbol.textContent = '$'; // Change to your currency symbol
     } else {
-        discountSymbol.textContent = '';
+        const type = discountTypeEl.value.toLowerCase();
+        if (type === 'percentage') {
+            discountSymbol.textContent = '%';
+            updateTotals()
+        } else if (type === 'flat') {
+            discountSymbol.textContent = '$'; // Change to your currency symbol
+        } else {
+            discountSymbol.textContent = '';
+        }
     }
-}
 
+    // 1. Calculate live subtotal directly from the table rows
+    // let total = 0;
+    // document.querySelectorAll('#items-table tbody tr').forEach(row => {
+    //     let qtyInput = row.querySelector('input[name$="quantity"]');
+    //     let priceInput = row.querySelector('input[name$="price"]');
+    //     if (!qtyInput || !priceInput) return;
+        
+    //     let qty = parseFloat(qtyInput.value) || 0;
+    //     let price = parseFloat(priceInput.value) || 0;
+    //     let itemTotal = qty * price;
+        
+    //     row.querySelector('.item-total').innerText = itemTotal.toFixed(2);
+    //     total += itemTotal;
+    // });
+
+    // // 2. Apply discount math on top of that fresh subtotal
+    // if (discountSwitch.checked) {
+    //     const discountValue = parseFloat(discountValueEl.value) || 0;
+    //     const type = discountTypeEl.value.toLowerCase();
+
+    //     if (type === 'percentage') {
+    //         total = total - (total * discountValue / 100);
+    //     } else if (type === 'flat') {
+    //         total = total - discountValue;
+    //     }
+    // }
+
+    // // Prevent negative invoice totals
+    // if (total < 0) total = 0;
+
+    // // 3. Render the updated final total to the DOM
+    // const totalDisplay = document.getElementById('invoice-total');
+    // if (totalDisplay) totalDisplay.innerText = total.toFixed(2);
+    // 1. Grab each row's calculated item-total text and add them up
+    // let total = 0;
+    // document.querySelectorAll('#items-table tbody .item-total').forEach(cell => {
+    //     let value = parseFloat(cell.innerText) || 0;
+    //     total += value;
+    // });
+
+    // // 2. Apply discount math on top of that aggregated total
+    // if (discountSwitch.checked) {
+    //     const discountValue = parseFloat(discountValueEl.value) || 0;
+    //     const type = discountTypeEl.value.toLowerCase();
+
+    //     if (type === 'percentage') {
+    //         total = total - (total * discountValue / 100);
+    //     } else if (type === 'flat') {
+    //         total = total - discountValue;
+    //     }
+    // }
+
+    // // Prevent negative invoice totals
+    // if (total < 0) total = 0;
+
+    // // 3. Render the final total to the DOM
+    // const totalDisplay = document.getElementById('invoice-total');
+    // if (totalDisplay) totalDisplay.innerText = total.toFixed(2);
+}
 // Handle discount logic
 function handleDiscountChange() {
     if (!discountSwitch.checked) return;
 
     updateDiscountSymbol(); // Update symbol
-
+    
     const discountType = discountTypeEl.value;
     const discountValue = discountValueEl.value.trim();
   
@@ -277,6 +293,76 @@ discountValueEl.disabled = true;
 updateDiscountSymbol();
 
 
+// Clean initialization function
+        function initInvoicePage() {
+            const statusSelect = document.getElementById('id_status');
+            const dueDiv = document.getElementById('due-date-div');
+            const addItemBtn = document.getElementById('add-item');
+            const formsetPrefix = '{{ formset.prefix }}';
+            let totalForms = document.querySelector(`#id_${formsetPrefix}-TOTAL_FORMS`);
+
+
+            // Status Toggle
+            if (statusSelect && dueDiv) {
+                const toggle = () => {
+                    const showDue = ['payment_due', 'partially_paid'].includes(statusSelect.value);
+                    dueDiv.style.display = showDue ? 'block' : 'none';
+                };
+                statusSelect.addEventListener('change', toggle);
+                toggle();
+            }
+
+            // Input listeners
+            document.querySelectorAll('[name$="quantity"], [name$="price"]').forEach(input => {
+                input.addEventListener('input', updateTotals);
+            });
+
+            // Add Item
+            if (addItemBtn && totalForms) {
+                addItemBtn.onclick = () => {
+                    let table = document.getElementById('items-table').querySelector('tbody');
+                    let index = parseInt(totalForms.value);
+                    let row = table.insertRow();
+                    row.innerHTML = `
+                         <td class="row-number">${index + 1}</td>
+                        <td><input type="text" name="${formsetPrefix}-${index}-item_name" class="form-control" /></td>
+                        <td><input type="number" name="${formsetPrefix}-${index}-quantity" value="1" class="form-control" /></td>
+                        <td><input type="number" name="${formsetPrefix}-${index}-price" value="0" class="form-control" step="0.01" /></td>
+                        <td class="item-total">0</td>
+                        <td><button type="button" class="btn btn-sm btn-danger remove-item">X</button></td>
+                    `;
+                    totalForms.value = index + 1;
+                    row.querySelectorAll('input').forEach(i => i.addEventListener('input', updateTotals));
+                    // row.querySelector('.remove-item').onclick = (e) => { e.target.closest('tr').remove(); updateTotals(); };
+                    row.querySelector('.remove-item').onclick = (e) => { 
+    e.target.closest('tr').remove(); 
+    
+    // Check if the discount switch is active
+    if (discountSwitch && discountSwitch.checked) {
+        updateDiscountSymbol(); // Recalculates remaining rows + applies discount
+    } else {
+        updateTotals(); // Fallback: just recalculates remaining rows normally
+    }
+};
+                    updateTotals();
+                };
+            }
+
+            // Remove Item
+            document.querySelectorAll('.remove-item').forEach(btn => {
+                btn.onclick = (e) => { e.target.closest('tr').remove(); updateTotals(); };
+            });
+
+            updateTotals();
+        }
+
+        // Run once on load
+        initInvoicePage();
+
+        document.getElementById('discountSwitch').addEventListener('change', function () {
+    document.getElementById('discountSection').classList.toggle('d-none', !this.checked);
+    
+});
 
 
 </script>
