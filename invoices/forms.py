@@ -26,13 +26,14 @@ ItemFormSet = inlineformset_factory(
     Invoice,
     Item,
     #formset=BaseItemFormSet,
-    fields=['item_name', 'quantity', 'price'],
+    fields=['item_name', 'quantity', 'price', 'per_item_discount_percentage'],
     extra=1,
     can_delete=True,
     widgets={
         'item_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder':'Pilot Line Filter 0018A'}),
         'quantity': forms.NumberInput(attrs={'class': 'form-control', 'value':1}),
-        'price': forms.NumberInput(attrs={'class': 'form-control', 'value':0, 'step':0.01})
+        'price': forms.NumberInput(attrs={'class': 'form-control', 'value':0, 'step':0.01}),
+        'per_item_discount_percentage': forms.NumberInput(attrs={'class': 'form-control', 'value':0, 'step':0.01})
     }
 )
 
