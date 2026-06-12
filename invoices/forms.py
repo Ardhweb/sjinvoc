@@ -2,14 +2,14 @@ from django import forms
 from .models import Invoice, Client
 from django import forms
 from django.forms import inlineformset_factory,models
-from .models import Invoice, Item, Client
+from .models import Invoice, Item, Client, Discount
 
 class GuestInvoiceForm(forms.ModelForm):
     class Meta:
         model = Invoice
         fields = ['guest_client_name', 'due_date', 'status', 'context_title']
         widgets = {
-            'status': forms.Select(attrs={'class': 'form-control'}),
+            'status': forms.Select(attrs={'class': 'form-control form-select','aria-label':"Default select example"}),
             'due_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'guest_client_name': forms.TextInput(attrs={'class': 'form-control'}),
             'context_title': forms.TextInput(attrs={'class': 'form-control'}),
@@ -26,13 +26,14 @@ ItemFormSet = inlineformset_factory(
     Invoice,
     Item,
     #formset=BaseItemFormSet,
-    fields=['item_name', 'quantity', 'price'],
+    fields=['item_name', 'quantity', 'price', 'per_item_discount_percentage'],
     extra=1,
     can_delete=True,
     widgets={
         'item_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder':'Pilot Line Filter 0018A'}),
         'quantity': forms.NumberInput(attrs={'class': 'form-control', 'value':1}),
-        'price': forms.NumberInput(attrs={'class': 'form-control', 'value':0, 'step':0.01})
+        'price': forms.NumberInput(attrs={'class': 'form-control', 'value':0, 'step':0.01}),
+        'per_item_discount_percentage': forms.NumberInput(attrs={'class': 'form-control', 'value':0, 'step':0.01})
     }
 )
 
@@ -41,7 +42,7 @@ class ClientInvoiceForm(forms.ModelForm):
         model = Invoice
         fields = ['client', 'due_date', 'status']
         widgets = {
-            'status': forms.Select(attrs={'class': 'form-control'}),
+            'status': forms.Select(attrs={'class': 'form-control, form-select', 'aria-label':"Default select example"}),
             'due_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'client': forms.Select(attrs={'class': 'form-control'})
         }
@@ -61,7 +62,7 @@ class EditInvoiceForm(forms.ModelForm):
         fields = ['guest_client_name','client', 'due_date', 'status']
         widgets = {
             'guest_client_name': forms.TextInput(attrs={'class': 'form-control'}),
-            'status': forms.Select(attrs={'class': 'form-control'}),
+            'status': forms.Select(attrs={'class': 'form-control form-select', 'aria-label':"Default select example"}),
             'due_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'client': forms.Select(attrs={'class': 'form-control'})
         }
@@ -83,3 +84,19 @@ class CreateClientForm(forms.ModelForm):
             'place': forms.TextInput(attrs={'class': 'form-control', 'placeholder': ' Customer Address'}),
             'phone': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Phone'}),
         }
+
+
+class DiscountForm(forms.ModelForm):
+    class Meta:
+        model = Discount
+        fields = ['value', 'discount_type']
+        labels = {
+            'value': 'Discount',
+        }
+
+        widgets = {
+        'discount_type': forms.Select(attrs={'class': 'form-control form-select', 'aria-label':"Default select example"}),
+        'value': forms.TextInput(attrs={'class': 'form-control',}),  
+            
+        }
+        

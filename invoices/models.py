@@ -144,11 +144,20 @@ class Item(models.Model):
     item_name = models.CharField(max_length=255)
     quantity = models.IntegerField(blank=True, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
+    per_item_discount_percentage = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0.00)])
     is_active = models.BooleanField(default=True)
+
+    # @property
+    # def total(self):
+    #     return self.quantity * self.price
 
     @property
     def total(self):
-        return self.quantity * self.price
+        total = self.quantity * self.price
+        if self.per_item_discount_percentage:
+            discount_amount = total * (self.per_item_discount_percentage / 100)
+            total -= discount_amount
+        return total
 
 
 class DiscountCategory(models.Model):
@@ -173,7 +182,8 @@ class DiscountCategory(models.Model):
         help_text="Underlying core category behavior"
     )
     code = models.CharField(max_length=50, blank=True, null=True, help_text="Coupon code if applicable")
-
+    value = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0.00)])
+    
     def __str__(self):
         return f"{self.name} [{self.get_system_type_display()}] ({self.firm.name})"
 

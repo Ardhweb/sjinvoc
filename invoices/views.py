@@ -11,7 +11,7 @@ from weasyprint import HTML
 from datetime import date,datetime
 from django.shortcuts import render, redirect
 from .models import Invoice, Item
-from .forms import GuestInvoiceForm, ItemFormSet,CreateClientForm
+from .forms import GuestInvoiceForm, ItemFormSet,CreateClientForm,DiscountForm
 from django.contrib.admin.views.decorators import staff_member_required
 from pathlib import Path
 import platform
@@ -50,6 +50,8 @@ def guest_invoice_create(request):
         # Bind the form and items
         form = GuestInvoiceForm(request.POST)
         formset = ItemFormSet(request.POST)
+        dis_form = DiscountForm(request.POST)
+
 
         # Debugging: show why forms might be invalid
         print("Form is valid?", form.is_valid())
@@ -98,11 +100,14 @@ def guest_invoice_create(request):
     else:
         form = GuestInvoiceForm()
         formset = ItemFormSet()
+        dis_form = DiscountForm()
+
 
     return render(request, 'invoices/guest_invoice_create.html', {
         'form': form,
         'formset': formset,
-        'preview_invoice_no': preview_invoice_no
+        'preview_invoice_no': preview_invoice_no,
+        'dis_form':dis_form,
     })
 
 @login_required
@@ -122,11 +127,13 @@ def client_invoice_create(request):
     # Full invoice number display
     #preview_invoice_no = f"{current_year}-{str(next_invoice_no).zfill(3)}-{default_suffix}"
     preview_invoice_no = next_invoice_no
-
+    
     if request.method == 'POST':
         # Bind the form and items
         form = ClientInvoiceForm(request.POST)
         formset = ItemFormSet(request.POST)
+        dis_form = DiscountForm(request.POST)
+
 
         # Debugging: show why forms might be invalid
         print("Form is valid?", form.is_valid())
@@ -173,11 +180,13 @@ def client_invoice_create(request):
     else:
         form = ClientInvoiceForm()
         formset = ItemFormSet()
+        dis_form = DiscountForm()
 
     return render(request, 'invoices/client_invoice_create.html', {
         'form': form,
         'formset': formset,
-        'preview_invoice_no': preview_invoice_no
+        'preview_invoice_no': preview_invoice_no,
+        'dis_form':dis_form,
     })
 
 
