@@ -54,24 +54,33 @@
                 
             </div>
         </div>
-
-        <h4 class="mt-4">Items</h4>
+ <div class="container-fluid my-3 " style="background-color: #f8f9fa; border-radius: 5px;">
+        <!-- Small heading with subtle background -->
+    <h6 class=" p-2" style="background-color: #e9ecef; color: #495057; border-radius: 3px;">
+        Items
+    </h6>
         <table class="table table-striped" id="items-table">
             <thead>
                 <tr>
+                    <th style="width:2.5rem;!important;">No.</th>
                     <th>Description</th>
-                    <th style="width: 12rem!important;">Quantity</th>
-                    <th style="width: 12rem!important;">Price</th>
-                    <th>Total</th>
-                    <th style="width: 12rem!important;">Remove</th>
+                    <th style="width: 12rem!important;">Qty</th>
+                    <th style="width: 12rem!important;">Unit Price</th>
+                    <th style="width: 6rem!important;">per item discount%</th>
+                   
+                    <th>Subtotal</th>
+                    <th style="width: 9rem!important;">Remove</th>
                 </tr>
             </thead>
             <tbody>
             {% for form in formset.forms %}
                 <tr>
+                    <td>{{ forloop.counter }}</td>
                     <td>{{ form.item_name }}</td>
-                    <td class="w-10">{{ form.quantity }}</td>
-                    <td>{{ form.price }}</td>
+                    <td class="">{{ form.quantity }}</td>
+                    <td >{{ form.price }}</td>
+                    <td class="">{{form.per_item_discount_percentage}}</td>
+                    
                     <td class="item-total">0</td>
                     <td>
                         {% if form.instance.pk %}
@@ -84,84 +93,218 @@
             {% endfor %}
             </tbody>
         </table>
+        <div class="row">
+            <div class="col-auto">
+         <button type="button" class="btn btn-dark btn-sm btn-secondary" id="add-item">Add more item</button>
 
-        <button type="button" class="btn btn-dark btn-sm btn-secondary" id="add-item">Add more item</button>
+</div>
+
+    
+    <div class="col-auto form-check form-switch">
+        <input class="form-check-input" type="checkbox" id="discountSwitch">
+        <label class="form-check-label" for="discountSwitch">
+            Add Overall Discount
+        </label>
+    </div>
+   
+
+</div>
+
+        </div>
+
+        <div id="discountSection" class=" d-none container-fluid my-3 " style="background-color: #f8f9fa; border-radius: 5px;">
+    <!-- Small heading with subtle background -->
+    <h6 class="mb-3 p-2" style="background-color: #e9ecef; color: #495057; border-radius: 3px;">
+        Discount Details
+    </h6>
+
+    <!-- Inline form fields -->
+    <div class="row g-2 align-items-center">
+        <div class="col-auto">
+            {{ dis_form.discount_type.label_tag }}
+            {{ dis_form.discount_type }}
+        </div>
+        <div class="col-auto">
+            {{ dis_form.value.label_tag }}
+
+             <div style="display:flex; align-items:center; gap:6px;">
+        {{ dis_form.value }}
+        <span id="discountSymbol"></span>
+    </div>
+        </div>
+    </div>
+</div>
+       
         <h5 class="mt-3">Invoice Total: <span id="invoice-total">0</span></h5>
 
         <!-- Use type="submit" to trigger the dashboard listener -->
         <button type="submit" id="submit-btn" class="btn btn-primary mt-3">Done</button>
     </form>
+ <script>
 
-    <script>
-        // Clean initialization function
-        function initInvoicePage() {
-            const statusSelect = document.getElementById('id_status');
-            const dueDiv = document.getElementById('due-date-div');
-            const addItemBtn = document.getElementById('add-item');
-            const formsetPrefix = '{{ formset.prefix }}';
-            let totalForms = document.querySelector(`#id_${formsetPrefix}-TOTAL_FORMS`);
+function updateTotals() {
+    let total = 0;
+    
+    // 1. Calculate live subtotal directly from the table rows
+    document.querySelectorAll('#items-table tbody tr').forEach(row => {
+        let qtyInput = row.querySelector('input[name$="quantity"]');
+        let priceInput = row.querySelector('input[name$="price"]');
+        let itemDiscountInput = row.querySelector('input[name$="per_item_discount_percentage"]');
+        if (!qtyInput || !priceInput) return;
+        
+        let qty = parseFloat(qtyInput.value) || 0;
+        let price = parseFloat(priceInput.value) || 0;
+        let itemDiscountPercent =   parseFloat(itemDiscountInput.value) || 0;
+        let itemTotal = qty * price;
 
-            function updateTotals() {
-                let total = 0;
-                document.querySelectorAll('#items-table tbody tr').forEach(row => {
-                    let qtyInput = row.querySelector('input[name$="quantity"]');
-                    let priceInput = row.querySelector('input[name$="price"]');
-                    if (!qtyInput || !priceInput) return;
-                    let qty = parseFloat(qtyInput.value) || 0;
-                    let price = parseFloat(priceInput.value) || 0;
-                    let itemTotal = qty * price;
-                    row.querySelector('.item-total').innerText = itemTotal.toFixed(2);
-                    total += itemTotal;
-                });
-                const totalDisplay = document.getElementById('invoice-total');
-                if (totalDisplay) totalDisplay.innerText = total.toFixed(2);
-            }
+       // FIX: Subtract the discount amount from the total
+if (itemDiscountPercent > 0) {
+    let discountAmount = (itemTotal * itemDiscountPercent) / 100;
+    itemTotal = itemTotal - discountAmount; 
+    console.log("Discount applied! New total:", itemTotal);
+}
 
-            // Status Toggle
-            if (statusSelect && dueDiv) {
-                const toggle = () => {
-                    const showDue = ['payment_due', 'partially_paid'].includes(statusSelect.value);
-                    dueDiv.style.display = showDue ? 'block' : 'none';
-                };
-                statusSelect.addEventListener('change', toggle);
-                toggle();
-            }
+       
+        
+        row.querySelector('.item-total').innerText = itemTotal.toFixed(2);
+        total += itemTotal;
+    });
 
-            // Input listeners
-            document.querySelectorAll('[name$="quantity"], [name$="price"]').forEach(input => {
-                input.addEventListener('input', updateTotals);
-            });
+    // 2. Apply discount math on top of that aggregated total
+    if (discountSwitch && discountSwitch.checked) {
+        const discountValue = parseFloat(discountValueEl.value) || 0;
+        const type = discountTypeEl.value.toLowerCase();
 
-            // Add Item
-            if (addItemBtn && totalForms) {
-                addItemBtn.onclick = () => {
-                    let table = document.getElementById('items-table').querySelector('tbody');
-                    let index = parseInt(totalForms.value);
-                    let row = table.insertRow();
-                    row.innerHTML = `
-                        <td><input type="text" name="${formsetPrefix}-${index}-item_name" class="form-control" /></td>
-                        <td><input type="number" name="${formsetPrefix}-${index}-quantity" value="1" class="form-control" /></td>
-                        <td><input type="number" name="${formsetPrefix}-${index}-price" value="0" class="form-control" step="0.01" /></td>
-                        <td class="item-total">0</td>
-                        <td><button type="button" class="btn btn-sm btn-danger remove-item">X</button></td>
-                    `;
-                    totalForms.value = index + 1;
-                    row.querySelectorAll('input').forEach(i => i.addEventListener('input', updateTotals));
-                    row.querySelector('.remove-item').onclick = (e) => { e.target.closest('tr').remove(); updateTotals(); };
-                    updateTotals();
-                };
-            }
-
-            // Remove Item
-            document.querySelectorAll('.remove-item').forEach(btn => {
-                btn.onclick = (e) => { e.target.closest('tr').remove(); updateTotals(); };
-            });
-
-            updateTotals();
+        if (type === 'percentage') {
+            total = total - (total * discountValue / 100);
+        } else if (type === 'flat') {
+            total = total - discountValue;
         }
+    }
 
-        // Run once on load
-        initInvoicePage();
-    </script>
+    // Prevent negative invoice totals
+    if (total < 0) total = 0;
+
+    // 3. Render the final total to the DOM
+    const totalDisplay = document.getElementById('invoice-total');
+    if (totalDisplay) totalDisplay.innerText = total.toFixed(2);
+}
+
+// Grab elements
+const discountSwitch = document.getElementById('discountSwitch');
+const discountTypeEl = document.getElementById('id_discount_type');
+const discountValueEl = document.getElementById('id_value');
+const discountSymbol = document.getElementById('discountSymbol');
+
+// Update symbol strictly for UI presentation
+function updateDiscountSymbol() {
+    if (!discountSwitch.checked) {
+        discountSymbol.textContent = '';
+    } else {
+        const type = discountTypeEl.value.toLowerCase();
+        if (type === 'percentage') {
+            discountSymbol.textContent = '%';
+        } else if (type === 'flat') {
+            discountSymbol.textContent = '$'; 
+        } else {
+            discountSymbol.textContent = '';
+        }
+    }
+}
+
+// Handle discount logic changes
+function handleDiscountChange() {
+    updateDiscountSymbol();
+    updateTotals(); // Always trigger recalculation down the pipeline
+}
+
+// Enable/disable fields based on switch
+discountSwitch.addEventListener('change', function () {
+    const enabled = this.checked;
+    discountTypeEl.disabled = !enabled;
+    discountValueEl.disabled = !enabled;
+    
+    document.getElementById('discountSection').classList.toggle('d-none', !enabled);
+
+    handleDiscountChange();
+});
+
+// Trigger when type or value changes
+discountTypeEl.addEventListener('change', handleDiscountChange);
+discountValueEl.addEventListener('input', handleDiscountChange);
+
+// Initialize discount UI layout
+discountTypeEl.disabled = true;
+discountValueEl.disabled = true;
+updateDiscountSymbol();
+
+// Clean initialization function
+function initInvoicePage() {
+    const statusSelect = document.getElementById('id_status');
+    const dueDiv = document.getElementById('due-date-div');
+    const addItemBtn = document.getElementById('add-item');
+    const formsetPrefix = '{{ formset.prefix }}';
+    let totalForms = document.querySelector(`#id_${formsetPrefix}-TOTAL_FORMS`);
+
+    // Status Toggle
+    if (statusSelect && dueDiv) {
+        const toggle = () => {
+            const showDue = ['payment_due', 'partially_paid'].includes(statusSelect.value);
+            dueDiv.style.display = showDue ? 'block' : 'none';
+        };
+        statusSelect.addEventListener('change', toggle);
+        toggle();
+    }
+
+    // Input listeners for initial rows
+    document.querySelectorAll('[name$="quantity"], [name$="price"] , [name$="per_item_discount_percentage"]').forEach(input => {
+        input.addEventListener('input', updateTotals);
+    });
+
+    // Add Item
+    if (addItemBtn && totalForms) {
+        addItemBtn.onclick = () => {
+            let table = document.getElementById('items-table').querySelector('tbody');
+            let index = parseInt(totalForms.value);
+            let row = table.insertRow();
+            row.innerHTML = `
+                <td class="row-number">${index + 1}</td>
+                <td><input type="text" name="${formsetPrefix}-${index}-item_name" class="form-control" /></td>
+                <td><input type="number" name="${formsetPrefix}-${index}-quantity" value="1" class="form-control" /></td>
+                <td><input type="number" name="${formsetPrefix}-${index}-price" value="0" class="form-control" step="0.01" /></td>
+                 <td><input type="number" name="${formsetPrefix}-${index}-per_item_discount_percentage" value="0" class="form-control" step="0.01" /></td>
+                <td class="item-total">0.00</td>
+                <td><button type="button" class="btn btn-sm btn-danger remove-item">X</button></td>
+            `;
+            totalForms.value = index + 1;
+            
+            // Listeners for dynamic inputs
+            row.querySelectorAll('input').forEach(i => i.addEventListener('input', updateTotals));
+            
+            // Unified remove logic for new items
+            row.querySelector('.remove-item').onclick = (e) => { 
+                e.target.closest('tr').remove(); 
+                updateTotals(); 
+            };
+            
+            updateTotals();
+        };
+    }
+
+    // Unified remove logic for initial items loaded on page template load
+    document.querySelectorAll('.remove-item').forEach(btn => {
+        btn.onclick = (e) => { 
+            e.target.closest('tr').remove(); 
+            updateTotals(); 
+        };
+    });
+
+    updateTotals();
+}
+
+// Run once on load
+initInvoicePage();
+
+</script>
 </div> <!-- 🚀 END content-area -->
 {% endblock %}

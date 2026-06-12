@@ -50,6 +50,8 @@ def guest_invoice_create(request):
         # Bind the form and items
         form = GuestInvoiceForm(request.POST)
         formset = ItemFormSet(request.POST)
+        dis_form = DiscountForm(request.POST)
+
 
         # Debugging: show why forms might be invalid
         print("Form is valid?", form.is_valid())
@@ -98,11 +100,14 @@ def guest_invoice_create(request):
     else:
         form = GuestInvoiceForm()
         formset = ItemFormSet()
+        dis_form = DiscountForm()
+
 
     return render(request, 'invoices/guest_invoice_create.html', {
         'form': form,
         'formset': formset,
-        'preview_invoice_no': preview_invoice_no
+        'preview_invoice_no': preview_invoice_no,
+        'dis_form':dis_form,
     })
 
 @login_required
