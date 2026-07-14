@@ -45,7 +45,7 @@
             <td style="white-space: normal; word-break: break-word; overflow-wrap: break-word;">{{ item.quantity }}</td>
             <td style="white-space: normal; word-break: break-word; overflow-wrap: break-word;">{{ item.price }}</td>
             <td class="text-center" style="white-space: normal; word-break: break-word; overflow-wrap: break-word;">{{ item.per_item_discount_percentage }} %</td>
-            <td style="white-space: normal; word-break: break-word; overflow-wrap: break-word;">{{ item.total }}</td>
+            <td style="white-space: normal; word-break: break-word; overflow-wrap: break-word;">{{ item.total|floatformat:2 }}</td>
         </tr>
         {% endif %}
         {% empty %}
@@ -57,7 +57,7 @@
     <tfoot>
         <tr>
             <th colspan="5" class="text-end">Total</th>
-            <th style="white-space: normal; word-break: break-word; overflow-wrap: break-word;">{{ invoice.total }}</th>
+            <th style="white-space: normal; word-break: break-word; overflow-wrap: break-word;">{{ invoice.total|floatformat:2 }}</th>
         </tr>
     </footer>
 </table>
