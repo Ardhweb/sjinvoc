@@ -20,6 +20,8 @@ from django.conf import settings #for Media Manging Step4
 from django.conf.urls.static import static #For Media Manging and Static step4
 #from django.conf.urls import url
 from django.views.generic import TemplateView
+from debug_toolbar.toolbar import debug_toolbar_urls
+
 urlpatterns = [
     path('internal-admin/control/', admin.site.urls),
     path('invoices/' ,include("invoices.urls")),
@@ -27,9 +29,18 @@ urlpatterns = [
     path('tools/' ,include("toolszest.urls")),
     path('', TemplateView.as_view(template_name="index.html"), name='home'),
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)#For Media Manging Step4
-
 static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
+if settings.DEBUG:
+    urlpatterns += debug_toolbar_urls()
+
+'''
+if not settings.TESTING:
+    from debug_toolbar.toolbar import debug_toolbar_urls
+
+    urlpatterns = [
+        *urlpatterns,
+    ] + debug_toolbar_urls()'''
 
 #Admin -Panel Manully Change txt Header Start Here
 admin.site.site_header = "SJ Invoc admin"
