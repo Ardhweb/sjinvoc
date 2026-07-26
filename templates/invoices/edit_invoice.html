@@ -45,7 +45,8 @@
                 <tr>
                     <th>Description</th>
                     <th style="width: 150px;">Quantity</th>
-                    <th style="width: 150px;">Price</th>
+                    <th style="width: 150px;">Unit Price</th>
+                    <th style="width: 150px;">per Item Discount %</th>
                     <th style="width: 120px;">Total</th>
                     <th style="width: 80px;">Action</th>
                 </tr>
@@ -59,6 +60,7 @@
                         <td>{{ form.item_name }}</td>
                         <td>{{ form.quantity }}</td>
                         <td>{{ form.price }}</td>
+                         <td>{{ form.per_item_discount_percentage }}</td>
                         <td class="item-total">0.00</td>
                         <td class="text-center">
                             {% if form.instance.pk %}

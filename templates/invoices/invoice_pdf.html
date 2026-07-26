@@ -102,7 +102,7 @@
 
         <!-- Right Column: Invoice Info -->
         <div class="invoice-info">
-            <div><strong>Invoice no:</strong>#{{invoice.id}}</div>
+            <div><strong>Invoice no:</strong>#{{invoice.invoice_no}}</div>
             <div><strong>Date:</strong> {{invoice.date|date:"d/m/Y"}}</div>
             {% if invoice.due_date %}
             <div><strong>Due:</strong> {{ invoice.due_date|date:"d/m/Y"}}</div>

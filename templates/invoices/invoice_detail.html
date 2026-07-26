@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="container ms-auto p-2">
-    <h2>Invoice #{{ invoice.id }}</h2>
+    <h2>Invoice #{{ invoice.invoice_no }}</h2>
   <p><strong>Subject/Title:</strong>  {% if invoice.context_title %}
             {{ invoice.context_title }}
         {% else %}
