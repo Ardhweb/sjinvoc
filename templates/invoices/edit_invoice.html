@@ -11,12 +11,12 @@
         <div class="row g-3 align-items-end mb-4">
             <div class="col-auto">
                 {% if form.client.value %}
-    {{ form.client.label_tag }}
-    {{ form.client }}
-{% else %}
-    {{ form.guest_client_name.label_tag }}
-    {{ form.guest_client_name }}
-{% endif %}
+                    {{ form.client.label_tag }}
+                    {{ form.client }}
+                {% else %}
+                    {{ form.guest_client_name.label_tag }}
+                    {{ form.guest_client_name }}
+                {% endif %}
             </div>
 
             <div class="col-auto">
@@ -60,7 +60,7 @@
                         <td>{{ form.item_name }}</td>
                         <td>{{ form.quantity }}</td>
                         <td>{{ form.price }}</td>
-                         <td>{{ form.per_item_discount_percentage }}</td>
+                        <td>{{ form.per_item_discount_percentage }}</td>
                         <td class="item-total">0.00</td>
                         <td class="text-center">
                             {% if form.instance.pk %}
@@ -104,7 +104,11 @@
 
                     const qty = parseFloat(row.querySelector('input[name$="quantity"]')?.value) || 0;
                     const price = parseFloat(row.querySelector('input[name$="price"]')?.value) || 0;
-                    const lineTotal = qty * price;
+                    const discount = parseFloat(row.querySelector('input[name$="per_item_discount_percentage"]')?.value) || 0;
+                    
+                    // Line total with percentage discount calculation
+                    const baseTotal = qty * price;
+                    const lineTotal = baseTotal - (baseTotal * (discount / 100));
                     
                     const totalCell = row.querySelector('.item-total');
                     if (totalCell) totalCell.innerText = lineTotal.toFixed(2);
@@ -124,14 +128,18 @@
                 toggle();
             }
 
-            // Listen for input changes on existing fields
+            // Listen for real-time input changes on existing and dynamic fields
             document.querySelector('#items-table').addEventListener('input', (e) => {
-                if (e.target.name.includes('quantity') || e.target.name.includes('price')) {
+                if (
+                    e.target.name.includes('quantity') || 
+                    e.target.name.includes('price') || 
+                    e.target.name.includes('per_item_discount_percentage')
+                ) {
                     updateTotals();
                 }
             });
 
-            // Add new row
+            // Add new row (includes discount field & table column mapping)
             addItemBtn.addEventListener('click', () => {
                 const tbody = document.querySelector('#items-table tbody');
                 const index = parseInt(totalForms.value);
@@ -141,6 +149,7 @@
                     <td><input type="text" name="${formsetPrefix}-${index}-item_name" class="form-control" /></td>
                     <td><input type="number" name="${formsetPrefix}-${index}-quantity" value="1" class="form-control" /></td>
                     <td><input type="number" name="${formsetPrefix}-${index}-price" value="0.00" class="form-control" step="0.01" /></td>
+                    <td><input type="number" name="${formsetPrefix}-${index}-per_item_discount_percentage" value="0" class="form-control" step="0.01" /></td>
                     <td class="item-total">0.00</td>
                     <td class="text-center"><button type="button" class="btn btn-outline-danger btn-sm remove-item">X</button></td>
                 `;
@@ -161,7 +170,6 @@
                 } 
                 else if (e.target.classList.contains('remove-item')) {
                     row.remove();
-                    // Optional: You could decrement TOTAL_FORMS here, but usually not required for new rows
                     updateTotals();
                 }
             });
