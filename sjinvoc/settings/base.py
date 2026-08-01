@@ -16,12 +16,13 @@ from dotenv import load_dotenv
 import dj_database_url
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-ENVIRONMENT = os.environ.get('DJANGO_ENV', 'local')  # default to 'local'
+ENVIRONMENT = os.environ.get('DJANGO_ENV', 'development')  # default to 'local'
 
 if ENVIRONMENT == 'production':
     env_path = BASE_DIR / '.env.production'
 else:
     env_path = BASE_DIR / '.env.local'
+
 print(ENVIRONMENT)
 
 load_dotenv(dotenv_path=env_path)
@@ -32,8 +33,12 @@ load_dotenv(dotenv_path=env_path)
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG')
+# DEBUG = os.getenv('DEBUG')
+
+DEBUG = ENVIRONMENT == "development"
+
 print(DEBUG)
+
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
 

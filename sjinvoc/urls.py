@@ -20,10 +20,9 @@ from django.conf import settings #for Media Manging Step4
 from django.conf.urls.static import static #For Media Manging and Static step4
 #from django.conf.urls import url
 from django.views.generic import TemplateView
-from debug_toolbar.toolbar import debug_toolbar_urls
+
 
 urlpatterns = [
-    path('internal-admin/control/', admin.site.urls),
     path('invoices/' ,include("invoices.urls")),
     path('accounts/' ,include("accounts.urls")),
     path('tools/' ,include("toolszest.urls")),
@@ -31,8 +30,14 @@ urlpatterns = [
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)#For Media Manging Step4
 static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
-if settings.DEBUG:
-    urlpatterns += debug_toolbar_urls()
+if settings.ENVIRONMENT == "development":
+    #import debug_toolbar
+    from debug_toolbar.toolbar import debug_toolbar_urls
+
+    urlpatterns += [
+        path('internal-admin/control/', admin.site.urls),
+        path("__debug__/", include(debug_toolbar.urls)),
+    ]
 
 '''
 if not settings.TESTING:
