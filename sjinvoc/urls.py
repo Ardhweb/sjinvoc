@@ -32,8 +32,6 @@ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 if settings.ENVIRONMENT == "development":
     import debug_toolbar
-    from debug_toolbar.toolbar import debug_toolbar_urls
-
     urlpatterns += [
         path('internal-admin/control/', admin.site.urls),
         path("__debug__/", include(debug_toolbar.urls)),
