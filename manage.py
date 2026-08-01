@@ -6,11 +6,12 @@ import sys
 
 def main():
     """Run administrative tasks."""
-    #os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'sjinvoc.settings')
-    #os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'sjinvoc.settings.local')
+    env = os.getenv("DJANGO_ENV", "development")
+    #local = development here local => settings.local.py
     os.environ.setdefault(
-    "DJANGO_SETTINGS_MODULE",
-    f"sjinvoc.settings.{os.getenv('DJANGO_ENV', 'development')}") #else production
+        "DJANGO_SETTINGS_MODULE",
+        "sjinvoc.settings.local" if env == "development" else f"sjinvoc.settings.{env}"
+    ) #else production
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
