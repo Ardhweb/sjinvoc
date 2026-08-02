@@ -15,10 +15,10 @@ PROJECT_ROOT = "/home/sjinvoc/sjinvoc"
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-#os.environ["DJANGO_SETTINGS_MODULE"] = "sjinvoc.settings.production"
-env = os.getenv("DJANGO_ENV", "development")
-os.environ["DJANGO_SETTINGS_MODULE"] =  "sjinvoc.settings.local" if env == "development" else f"sjinvoc.settings.{env}"
-
+os.environ["DJANGO_ENV"] = "production"
+os.environ.setdefault(
+    "DJANGO_SETTINGS_MODULE",
+    "sjinvoc.settings.production",
+)
 from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
-
